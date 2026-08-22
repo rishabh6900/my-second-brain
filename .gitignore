@@ -1,0 +1,24 @@
+# Environment secrets
+.env
+*.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+
+# Database / Local storage
+*.db
+*.sqlite3
+chatbot.db*
+
+# Angular / Node Dependencies
+node_modules/
+.angular/
+dist/
+
+# OS generated files
+.DS_Store
+Thumbs.db
