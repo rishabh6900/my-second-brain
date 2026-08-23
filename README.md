@@ -90,10 +90,9 @@ Lumi AI allows you to switch LLM models directly from the UI header dropdown or 
 | Model Name | Provider | Model ID | Strengths |
 | :--- | :--- | :--- | :--- |
 | **OpenRouter Free** | OpenRouter | `openrouter/free` | ✨ Auto-routes to the best available free model |
+| **Z.ai GLM 5.2** | Z.ai | `z-ai/glm-5.2:free` | 🧠 14.9B Reasoning, long-context (256k) & coding |
 | **Llama 3.3 70B** | Meta | `meta-llama/llama-3.3-70b-instruct:free` | 🔥 Powerful, state-of-the-art general reasoning |
 | **Gemini 2.0 Flash** | Google | `google/gemini-2.0-flash-exp:free` | ⚡ Ultra-fast token generation & long context |
-| **DeepSeek R1** | DeepSeek | `deepseek/deepseek-r1:free` | 🧠 High-depth reasoning & chain-of-thought |
-| **Qwen 2.5 Coder 32B** | Alibaba | `qwen/qwen-2.5-coder-32b-instruct:free` | 💻 Code generation, debugging & syntax analysis |
 | **Llama 3.1 8B** | Meta | `meta-llama/llama-3.1-8b-instruct:free` | 🚀 Lightweight, quick everyday responses |
 | **Mistral 7B** | Mistral AI | `mistralai/mistral-7b-instruct:free` | 🌪️ Compact and concise multilingual model |
 | **Llama 3.2 3B** | Meta | `meta-llama/llama-3.2-3b-instruct:free` | ⚡ Fast lightweight assistant |
@@ -225,7 +224,7 @@ My_second_brain/
    # OpenRouter AI Configuration (Free LLM Models)
    OPENROUTER_API_KEY="your_openrouter_api_key"
    OPENROUTER_MODEL="openrouter/free"
-   OPENROUTER_AVAILABLE_MODELS="openrouter/free,meta-llama/llama-3.3-70b-instruct:free,google/gemini-2.0-flash-exp:free,deepseek/deepseek-r1:free,qwen/qwen-2.5-coder-32b-instruct:free,meta-llama/llama-3.1-8b-instruct:free,mistralai/mistral-7b-instruct:free,meta-llama/llama-3.2-3b-instruct:free"
+   OPENROUTER_AVAILABLE_MODELS="openrouter/free,z-ai/glm-5.2:free,meta-llama/llama-3.3-70b-instruct:free,google/gemini-2.0-flash-exp:free,meta-llama/llama-3.1-8b-instruct:free,mistralai/mistral-7b-instruct:free,meta-llama/llama-3.2-3b-instruct:free"
 
    # Tavily AI Search Key (Live Web Search)
    TAVILY_API_KEY="your_tavily_api_key"

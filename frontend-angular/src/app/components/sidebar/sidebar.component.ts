@@ -103,14 +103,14 @@ import { ThreadSummary } from '../../services/chat.service';
       display: flex;
       align-items: center;
       gap: 0.75rem;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1.25rem;
       padding: 0 0.25rem;
     }
 
     .logo-icon {
       width: 38px;
       height: 38px;
-      border-radius: 12px;
+      border-radius: 14px;
       background: var(--accent-gradient);
       display: flex;
       align-items: center;
@@ -122,7 +122,7 @@ import { ThreadSummary } from '../../services/chat.service';
 
     .brand-text h2 {
       font-family: var(--font-heading);
-      font-size: 1.25rem;
+      font-size: 1.2rem;
       font-weight: 700;
       color: var(--text-primary);
       letter-spacing: -0.02em;
@@ -138,32 +138,68 @@ import { ThreadSummary } from '../../services/chat.service';
 
     .new-chat-btn {
       width: 100%;
-      padding: 0.75rem 1rem;
+      padding: 0.65rem 1rem;
       background: var(--accent-gradient);
       border: none;
-      border-radius: 12px;
+      border-radius: 20px;
       color: white;
       font-weight: 600;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 0.5rem;
       transition: all 0.2s ease;
-      box-shadow: 0 4px 12px var(--accent-glow);
+      box-shadow: 0 2px 10px var(--accent-glow);
     }
 
     .new-chat-btn:hover {
       transform: translateY(-1px);
-      box-shadow: 0 6px 20px var(--accent-glow);
+      box-shadow: 0 4px 16px var(--accent-glow);
       filter: brightness(1.1);
+    }
+
+    .vault-btn {
+      padding: 0.65rem 0.95rem;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      color: var(--text-primary);
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      transition: all 0.2s ease;
+    }
+
+    .vault-btn:hover {
+      background: rgba(99, 102, 241, 0.2);
+      border-color: var(--border-active);
+      color: var(--text-primary);
+      box-shadow: 0 2px 12px var(--accent-glow);
+      transform: translateY(-1px);
+    }
+
+    [data-theme="light"] .vault-btn {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      color: #0f172a;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    [data-theme="light"] .vault-btn:hover {
+      background: #f8fafc;
+      border-color: var(--accent-primary);
     }
 
     .divider {
       height: 1px;
       background: var(--border-color);
-      margin: 1.25rem 0 1rem 0;
+      margin: 1rem 0 0.85rem 0;
     }
 
     .section-title {
@@ -174,15 +210,24 @@ import { ThreadSummary } from '../../services/chat.service';
       font-weight: 700;
       color: var(--text-muted);
       letter-spacing: 0.08em;
-      margin-bottom: 0.75rem;
+      margin-bottom: 0.65rem;
       padding: 0 0.25rem;
     }
 
     .count-pill {
       background: rgba(255, 255, 255, 0.06);
-      padding: 2px 6px;
-      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-size: 0.7rem;
       color: var(--text-secondary);
+      font-weight: 600;
+    }
+
+    [data-theme="light"] .count-pill {
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      color: #64748b;
     }
 
     .threads-list {
@@ -190,41 +235,68 @@ import { ThreadSummary } from '../../services/chat.service';
       overflow-y: auto;
       display: flex;
       flex-direction: column;
-      gap: 0.35rem;
+      gap: 0.45rem;
       padding-right: 2px;
     }
 
     .thread-item {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
-      padding: 0.65rem 0.75rem;
-      border-radius: 10px;
+      gap: 0.65rem;
+      padding: 0.55rem 0.85rem;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
       color: var(--text-secondary);
       cursor: pointer;
-      transition: all 0.15s ease;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+      transition: all 0.2s ease;
       position: relative;
     }
 
     .thread-item:hover {
-      background: rgba(255, 255, 255, 0.04);
+      background: rgba(255, 255, 255, 0.09);
+      border-color: var(--border-active);
       color: var(--text-primary);
+      box-shadow: 0 2px 10px var(--accent-glow);
     }
 
     .thread-item.active {
-      background: rgba(99, 102, 241, 0.15);
-      border: 1px solid var(--border-active);
+      background: rgba(99, 102, 241, 0.2);
+      border-color: var(--border-active);
       color: var(--text-primary);
+      box-shadow: 0 2px 12px var(--accent-glow);
+    }
+
+    [data-theme="light"] .thread-item {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      color: #475569;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+    }
+
+    [data-theme="light"] .thread-item:hover {
+      background: #f8fafc;
+      border-color: var(--accent-primary);
+      color: #0f172a;
+    }
+
+    [data-theme="light"] .thread-item.active {
+      background: #ede9fe;
+      border-color: #818cf8;
+      color: #4338ca;
     }
 
     .thread-icon {
-      font-size: 1.1rem;
+      font-size: 1rem;
       color: var(--accent-primary);
+      flex-shrink: 0;
     }
 
     .thread-title {
       flex: 1;
-      font-size: 0.88rem;
+      font-size: 0.84rem;
+      font-weight: 500;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -235,10 +307,15 @@ import { ThreadSummary } from '../../services/chat.service';
       border: none;
       color: var(--text-muted);
       cursor: pointer;
-      padding: 4px;
-      border-radius: 6px;
-      display: opacity;
+      padding: 3px;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       opacity: 0;
+      flex-shrink: 0;
       transition: all 0.15s ease;
     }
 
@@ -248,7 +325,7 @@ import { ThreadSummary } from '../../services/chat.service';
 
     .delete-btn:hover {
       color: #ef4444;
-      background: rgba(239, 68, 68, 0.1);
+      background: rgba(239, 68, 68, 0.15);
     }
 
     .empty-threads {
@@ -267,8 +344,8 @@ import { ThreadSummary } from '../../services/chat.service';
       background: rgba(255, 255, 255, 0.06);
       border: 1px solid var(--border-color);
       color: var(--text-secondary);
-      border-radius: 8px;
-      padding: 5px 8px;
+      border-radius: 20px;
+      padding: 5px 10px;
       font-size: 1rem;
       cursor: pointer;
       margin-left: auto;
@@ -283,6 +360,12 @@ import { ThreadSummary } from '../../services/chat.service';
       background: rgba(99, 102, 241, 0.2);
       color: var(--text-primary);
       border-color: var(--border-active);
+    }
+
+    [data-theme="light"] .home-nav-btn {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      color: #475569;
     }
 
     .mobile-close-btn {
@@ -312,21 +395,29 @@ import { ThreadSummary } from '../../services/chat.service';
 
     .sidebar-footer {
       margin-top: auto;
-      padding-top: 1rem;
+      padding-top: 0.85rem;
       border-top: 1px solid var(--border-color);
       display: flex;
       flex-direction: column;
-      gap: 0.85rem;
+      gap: 0.75rem;
     }
 
     .user-profile-card {
       display: flex;
       align-items: center;
       gap: 0.75rem;
-      background: rgba(255, 255, 255, 0.04);
+      background: rgba(255, 255, 255, 0.05);
       border: 1px solid var(--border-color);
-      border-radius: 12px;
-      padding: 0.65rem 0.75rem;
+      border-radius: 20px;
+      padding: 0.55rem 0.85rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      transition: all 0.2s ease;
+    }
+
+    [data-theme="light"] .user-profile-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
     }
 
     .user-avatar {
@@ -336,11 +427,12 @@ import { ThreadSummary } from '../../services/chat.service';
       background: var(--accent-gradient);
       color: white;
       font-weight: 700;
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
+      box-shadow: 0 2px 8px var(--accent-glow);
     }
 
     .user-info {
@@ -351,7 +443,7 @@ import { ThreadSummary } from '../../services/chat.service';
     }
 
     .user-name {
-      font-size: 0.85rem;
+      font-size: 0.84rem;
       font-weight: 600;
       color: var(--text-primary);
       white-space: nowrap;
@@ -374,48 +466,47 @@ import { ThreadSummary } from '../../services/chat.service';
       cursor: pointer;
       font-size: 1.1rem;
       padding: 4px;
-      border-radius: 6px;
-      transition: color 0.15s ease;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
     }
 
     .logout-btn:hover {
       color: #ef4444;
-      background: rgba(239, 68, 68, 0.1);
+      background: rgba(239, 68, 68, 0.15);
     }
 
     .status-indicator {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
-      font-size: 0.75rem;
+      gap: 0.45rem;
+      font-size: 0.74rem;
+      font-weight: 500;
       color: var(--text-secondary);
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 0.3rem 0.75rem;
+      width: fit-content;
+    }
+
+    [data-theme="light"] .status-indicator {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      color: #475569;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
     }
 
     .pulse-dot {
-      width: 8px;
-      height: 8px;
+      width: 7px;
+      height: 7px;
       background: #10b981;
       border-radius: 50%;
-      box-shadow: 0 0 8px #10b981;
-    }
-    .vault-btn {
-      padding: 0.75rem 0.85rem;
-      background: rgba(99, 102, 241, 0.15);
-      border: 1px solid var(--border-active);
-      border-radius: 12px;
-      color: var(--accent-primary);
-      font-weight: 600;
-      font-size: 0.9rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-      transition: all 0.2s ease;
-    }
-
-    .vault-btn:hover {
-      background: rgba(99, 102, 241, 0.25);
-      transform: translateY(-1px);
+      box-shadow: 0 0 6px #10b981;
     }
   `]
 })

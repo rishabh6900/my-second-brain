@@ -21,10 +21,9 @@ def get_openrouter_models_list():
         return [m.strip() for m in env_models_str.split(",") if m.strip()]
     return [
         "openrouter/free",
+        "z-ai/glm-5.2:free",
         "meta-llama/llama-3.3-70b-instruct:free",
         "google/gemini-2.0-flash-exp:free",
-        "deepseek/deepseek-r1:free",
-        "qwen/qwen-2.5-coder-32b-instruct:free",
         "meta-llama/llama-3.1-8b-instruct:free",
         "mistralai/mistral-7b-instruct:free",
         "meta-llama/llama-3.2-3b-instruct:free"
@@ -34,10 +33,9 @@ FREE_OPENROUTER_MODELS = get_openrouter_models_list()
 
 MODEL_METADATA_MAP = {
     "openrouter/free": {"name": "OpenRouter Free (Auto Router)", "badge": "Auto Free", "icon": "ri-magic-line"},
+    "z-ai/glm-5.2:free": {"name": "Z.ai GLM 5.2 (Free)", "badge": "Z.ai 15B (Free)", "icon": "ri-brain-line"},
     "meta-llama/llama-3.3-70b-instruct:free": {"name": "Llama 3.3 70B (Free)", "badge": "Powerful (Free)", "icon": "ri-robot-2-line"},
     "google/gemini-2.0-flash-exp:free": {"name": "Gemini 2.0 Flash (Free)", "badge": "Ultra Fast (Free)", "icon": "ri-flashlight-line"},
-    "deepseek/deepseek-r1:free": {"name": "DeepSeek R1 (Free)", "badge": "Reasoning (Free)", "icon": "ri-brain-line"},
-    "qwen/qwen-2.5-coder-32b-instruct:free": {"name": "Qwen 2.5 Coder 32B (Free)", "badge": "Coding (Free)", "icon": "ri-code-s-slash-line"},
     "meta-llama/llama-3.1-8b-instruct:free": {"name": "Llama 3.1 8B (Free)", "badge": "Fast (Free)", "icon": "ri-speed-line"},
     "mistralai/mistral-7b-instruct:free": {"name": "Mistral 7B (Free)", "badge": "Balanced (Free)", "icon": "ri-sparkling-line"},
     "meta-llama/llama-3.2-3b-instruct:free": {"name": "Llama 3.2 3B (Free)", "badge": "Lightweight (Free)", "icon": "ri-feather-line"}

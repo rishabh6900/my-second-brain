@@ -214,9 +214,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.chatService.getThreads(userId).subscribe({
       next: (threads) => {
         this.threads = threads;
-        if (threads.length > 0 && !this.activeThreadId) {
-          this.onSelectThread(threads[threads.length - 1].id);
-        } else if (!this.activeThreadId) {
+        if (!this.activeThreadId) {
           this.onNewThread();
         }
       },

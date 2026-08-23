@@ -464,8 +464,11 @@ import { VaultService, VaultDocument } from '../../services/vault.service';
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 1rem;
+      gap: 0.75rem;
       transition: all 0.15s ease;
+      min-width: 0;
+      width: 100%;
+      box-sizing: border-box;
     }
 
     .doc-card:hover {
@@ -476,8 +479,10 @@ import { VaultService, VaultDocument } from '../../services/vault.service';
     .doc-left {
       display: flex;
       align-items: center;
-      gap: 0.85rem;
+      gap: 0.75rem;
       min-width: 0;
+      flex: 1;
+      overflow: hidden;
     }
 
     .doc-badge {
@@ -492,6 +497,14 @@ import { VaultService, VaultDocument } from '../../services/vault.service';
       flex-shrink: 0;
     }
 
+    .doc-details {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      flex: 1;
+      overflow: hidden;
+    }
+
     .doc-title {
       font-size: 0.88rem;
       font-weight: 600;
@@ -499,21 +512,28 @@ import { VaultService, VaultDocument } from '../../services/vault.service';
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      max-width: 300px;
+      width: 100%;
+      min-width: 0;
     }
 
     .doc-meta {
       display: flex;
       align-items: center;
-      gap: 0.4rem;
+      gap: 0.35rem;
       font-size: 0.72rem;
       color: var(--text-muted);
       margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      width: 100%;
+      min-width: 0;
     }
 
     .meta-pill {
       color: var(--accent-primary);
       font-weight: 600;
+      flex-shrink: 0;
     }
 
     .delete-doc-btn {
@@ -524,12 +544,50 @@ import { VaultService, VaultDocument } from '../../services/vault.service';
       font-size: 1.1rem;
       padding: 6px;
       border-radius: 8px;
+      flex-shrink: 0;
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       transition: all 0.15s ease;
     }
 
     .delete-doc-btn:hover {
       color: #ef4444;
       background: rgba(239, 68, 68, 0.15);
+    }
+
+    @media (max-width: 600px) {
+      .modal-card {
+        max-height: 90vh;
+        border-radius: 18px;
+      }
+      .modal-header {
+        padding: 1rem 1.2rem;
+      }
+      .modal-body {
+        padding: 1rem 1rem;
+      }
+      .doc-card {
+        padding: 0.75rem 0.75rem;
+        gap: 0.5rem;
+      }
+      .doc-badge {
+        width: 32px;
+        height: 32px;
+        font-size: 1rem;
+      }
+      .doc-title {
+        font-size: 0.82rem;
+      }
+      .doc-meta {
+        font-size: 0.68rem;
+        gap: 0.25rem;
+      }
+      .delete-doc-btn {
+        padding: 4px;
+        font-size: 1rem;
+      }
     }
 
     .empty-state {

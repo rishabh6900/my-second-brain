@@ -18,7 +18,6 @@ import { ThemeService } from '../../services/theme.service';
         </button>
         <div class="header-info">
           <h3>{{ activeTitle || 'New Conversation' }}</h3>
-          <span class="thread-badge">ID: {{ threadId | slice:0:8 }}...</span>
         </div>
 
         <!-- Dynamic LLM Model Selector -->
@@ -60,7 +59,8 @@ import { ThemeService } from '../../services/theme.service';
           (click)="useRag = !useRag"
           [title]="useRag ? 'Vault RAG Search ON (Click to disable)' : 'Vault RAG Search OFF (Click to enable)'"
         >
-          <span>🧠 Vault RAG</span>
+          <span class="full-label">🧠 Vault RAG</span>
+          <span class="short-label">🧠 RAG</span>
           <span class="rag-dot" [class.on]="useRag"></span>
         </button>
 
@@ -71,7 +71,8 @@ import { ThemeService } from '../../services/theme.service';
           (click)="useWebSearch = !useWebSearch"
           [title]="useWebSearch ? 'Live Web Search ON (Click to disable)' : 'Live Web Search OFF (Click to enable)'"
         >
-          <span>🌐 Web Search</span>
+          <span class="full-label">🌐 Web Search</span>
+          <span class="short-label">🌐 Web</span>
           <span class="rag-dot" [class.on]="useWebSearch"></span>
         </button>
 
@@ -837,6 +838,26 @@ import { ThemeService } from '../../services/theme.service';
       border: 1px solid var(--border-color);
       border-radius: 20px;
       padding: 0.25rem 0.65rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      transition: all 0.2s ease;
+    }
+
+    .lang-selector:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--border-active);
+      box-shadow: 0 2px 12px var(--accent-glow);
+    }
+
+    [data-theme="light"] .lang-selector {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    [data-theme="light"] .lang-selector:hover {
+      background: #f8fafc;
+      border-color: var(--accent-primary);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     }
 
     .lang-icon {
@@ -860,6 +881,19 @@ import { ThemeService } from '../../services/theme.service';
       color: var(--text-primary);
     }
 
+    [data-theme="light"] .lang-select option {
+      background: #ffffff;
+      color: #0f172a;
+    }
+
+    .short-label {
+      display: none;
+    }
+
+    .full-label {
+      display: inline;
+    }
+
     .rag-toggle-btn {
       display: flex;
       align-items: center;
@@ -873,19 +907,59 @@ import { ThemeService } from '../../services/theme.service';
       color: var(--text-secondary);
       cursor: pointer;
       margin-left: 0.5rem;
+      flex-shrink: 0;
+      white-space: nowrap;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
       transition: all 0.2s ease;
+    }
+
+    .rag-toggle-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--border-active);
+      box-shadow: 0 2px 12px var(--accent-glow);
+      transform: translateY(-1px);
     }
 
     .rag-toggle-btn.active {
       background: rgba(99, 102, 241, 0.2);
       border-color: var(--border-active);
       color: var(--text-primary);
+      box-shadow: 0 2px 12px var(--accent-glow);
+    }
+
+    [data-theme="light"] .rag-toggle-btn {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      color: #475569;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    [data-theme="light"] .rag-toggle-btn:hover {
+      background: #f8fafc;
+      border-color: var(--accent-primary);
+      color: #0f172a;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    [data-theme="light"] .rag-toggle-btn.active {
+      background: #ede9fe;
+      border-color: #818cf8;
+      color: #4338ca;
+      box-shadow: 0 2px 10px rgba(99, 102, 241, 0.2);
     }
 
     .web-toggle-btn.active {
       background: rgba(56, 189, 248, 0.2) !important;
       border-color: rgba(56, 189, 248, 0.5) !important;
       color: #38bdf8 !important;
+      box-shadow: 0 2px 12px rgba(56, 189, 248, 0.25) !important;
+    }
+
+    [data-theme="light"] .web-toggle-btn.active {
+      background: #e0f2fe !important;
+      border-color: #38bdf8 !important;
+      color: #0284c7 !important;
+      box-shadow: 0 2px 10px rgba(56, 189, 248, 0.25) !important;
     }
 
     .rag-dot {
@@ -915,12 +989,27 @@ import { ThemeService } from '../../services/theme.service';
       cursor: pointer;
       font-size: 1rem;
       flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
       transition: all 0.2s ease;
     }
 
     .header-vault-btn:hover {
       background: rgba(99, 102, 241, 0.2);
       border-color: var(--border-active);
+      box-shadow: 0 2px 12px var(--accent-glow);
+      transform: translateY(-1px);
+    }
+
+    [data-theme="light"] .header-vault-btn {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    [data-theme="light"] .header-vault-btn:hover {
+      background: #f8fafc;
+      border-color: var(--accent-primary);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     }
 
     .theme-btn {
@@ -937,6 +1026,7 @@ import { ThemeService } from '../../services/theme.service';
       cursor: pointer;
       font-size: 1.1rem;
       flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
       transition: all 0.2s ease;
     }
 
@@ -944,6 +1034,22 @@ import { ThemeService } from '../../services/theme.service';
       background: rgba(99, 102, 241, 0.15);
       border-color: var(--border-active);
       color: var(--text-primary);
+      box-shadow: 0 2px 12px var(--accent-glow);
+      transform: translateY(-1px);
+    }
+
+    [data-theme="light"] .theme-btn {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      color: #475569;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    [data-theme="light"] .theme-btn:hover {
+      background: #f8fafc;
+      border-color: var(--accent-primary);
+      color: #0f172a;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     }
 
     .menu-btn {
@@ -959,6 +1065,7 @@ import { ThemeService } from '../../services/theme.service';
       align-items: center;
       justify-content: center;
       margin-right: 0.5rem;
+      flex-shrink: 0;
       transition: all 0.2s ease;
     }
 
@@ -985,26 +1092,62 @@ import { ThemeService } from '../../services/theme.service';
 
     @media (max-width: 768px) {
       .chat-header {
-        padding: 0 0.65rem;
-        gap: 0.25rem;
+        padding: 0 0.5rem;
+        gap: 0.3rem;
+        overflow-x: auto;
+        overflow-y: hidden;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
       }
-      .thread-badge {
+      .chat-header::-webkit-scrollbar {
         display: none;
       }
-      .header-info h3 {
-        font-size: 0.88rem;
+      .header-info {
+        display: none;
       }
-      .model-selector, .lang-selector {
-        padding: 0.2rem 0.45rem;
+      .short-label {
+        display: inline;
+      }
+      .full-label {
+        display: none;
+      }
+      .menu-btn {
+        margin-right: 0.15rem;
+        min-width: 32px;
+        height: 32px;
+      }
+      .model-selector {
+        padding: 0.2rem 0.4rem;
         gap: 0.2rem;
+        flex-shrink: 0;
       }
       .model-select {
-        font-size: 0.75rem;
+        font-size: 0.76rem;
         max-width: 90px;
       }
+      .lang-selector {
+        margin-left: 0.1rem;
+        padding: 0.2rem 0.4rem;
+        gap: 0.2rem;
+        flex-shrink: 0;
+      }
       .lang-select {
-        font-size: 0.75rem;
-        max-width: 80px;
+        font-size: 0.76rem;
+        max-width: 70px;
+      }
+      .rag-toggle-btn {
+        margin-left: 0.1rem;
+        padding: 0.2rem 0.45rem;
+        font-size: 0.76rem;
+        flex-shrink: 0;
+        white-space: nowrap;
+      }
+      .header-vault-btn, .theme-btn {
+        width: 32px;
+        height: 32px;
+        margin-left: 0.15rem;
+        font-size: 1rem;
+        flex-shrink: 0;
       }
       .messages-container {
         padding: 1rem 0.75rem;
@@ -1055,10 +1198,9 @@ export class ChatBoxComponent implements OnInit, AfterViewChecked, OnChanges {
   selectedModel: string = 'openrouter/free';
   availableModels: ModelOption[] = [
     { id: 'openrouter/free', name: 'OpenRouter Free (Auto Router)', provider: 'OpenRouter' },
+    { id: 'z-ai/glm-5.2:free', name: 'Z.ai GLM 5.2 (Free)', provider: 'OpenRouter' },
     { id: 'meta-llama/llama-3.3-70b-instruct:free', name: 'Llama 3.3 70B (Free)', provider: 'OpenRouter' },
     { id: 'google/gemini-2.0-flash-exp:free', name: 'Gemini 2.0 Flash (Free)', provider: 'OpenRouter' },
-    { id: 'deepseek/deepseek-r1:free', name: 'DeepSeek R1 (Free)', provider: 'OpenRouter' },
-    { id: 'qwen/qwen-2.5-coder-32b-instruct:free', name: 'Qwen 2.5 Coder 32B (Free)', provider: 'OpenRouter' },
     { id: 'meta-llama/llama-3.1-8b-instruct:free', name: 'Llama 3.1 8B (Free)', provider: 'OpenRouter' },
     { id: 'mistralai/mistral-7b-instruct:free', name: 'Mistral 7B (Free)', provider: 'OpenRouter' },
     { id: 'meta-llama/llama-3.2-3b-instruct:free', name: 'Llama 3.2 3B (Free)', provider: 'OpenRouter' }
