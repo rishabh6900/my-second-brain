@@ -160,7 +160,15 @@ graph TD
 
 ```text
 My_second_brain/
-├── backend.py            # LangGraph workflow, OpenRouter LLM router, RAG pipeline & Voice engine
+├── backend/              # Modular backend architecture
+│   ├── __init__.py       # Package exports & backward compatibility
+│   ├── config.py         # App config, LLM model registry & language maps
+│   ├── llm.py            # Custom LLM wrappers (OpenRouter, Groq, Ollama)
+│   ├── agent.py          # LangGraph ChatState, chat node & compiled workflow
+│   ├── rag.py            # Embeddings, chunking, PDF/URL extractors & vector search
+│   ├── voice.py          # Audio transcription (STT) & speech synthesis (TTS)
+│   └── search.py         # Tavily live web search integration
+├── backend.py            # Backward compatibility module proxy
 ├── server.py             # FastAPI REST endpoints, SSE token streaming, Vault & Auth routes
 ├── db.py                 # Neon PostgreSQL schema, user auth, thread storage & PGVector RAG
 ├── requirements.txt      # Python backend packages
