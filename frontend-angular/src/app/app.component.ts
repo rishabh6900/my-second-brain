@@ -1,17 +1,28 @@
-import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Subscription } from 'rxjs';
 import { SidebarComponent } from './components/sidebar/sidebar.component';
 import { ChatBoxComponent } from './components/chat-box/chat-box.component';
 import { AuthComponent } from './components/auth/auth.component';
 import { VaultModalComponent } from './components/vault/vault-modal.component';
+import { VoiceModalComponent } from './components/voice-modal/voice-modal.component';
 import { ChatService, ThreadSummary, ChatMessage } from './services/chat.service';
 import { AuthService } from './services/auth.service';
 import { VaultService } from './services/vault.service';
+import { ThemeService } from './services/theme.service';
+import { VoiceControlService, VoiceCommand } from './services/voice-control.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, SidebarComponent, ChatBoxComponent, AuthComponent, VaultModalComponent],
+  imports: [
+    CommonModule, 
+    SidebarComponent, 
+    ChatBoxComponent, 
+    AuthComponent, 
+    VaultModalComponent,
+    VoiceModalComponent
+  ],
   template: `
     <!-- Landing / Home View when on '/' path or when logged out -->
     <app-auth 
@@ -43,6 +54,7 @@ import { VaultService } from './services/vault.service';
       ></app-sidebar>
 
       <app-chat-box
+        #chatBox
         [messages]="messages"
         [activeTitle]="activeTitle"
         [threadId]="activeThreadId"
@@ -50,13 +62,24 @@ import { VaultService } from './services/vault.service';
         (onSend)="handleUserSendMessage($event)"
         (toggleSidebar)="onToggleSidebar()"
         (openVaultModal)="isVaultOpen = true"
+        (openVoiceModal)="isVoiceModalOpen = true"
       ></app-chat-box>
 
+      <!-- Knowledge Vault Manager Modal -->
       <app-vault-modal
         *ngIf="isVaultOpen"
         [userId]="authService.currentUser?.id || 'guest'"
         (closeModal)="isVaultOpen = false"
       ></app-vault-modal>
+
+      <!-- Real-Time Conversational Voice Assistant & Control Modal -->
+      <app-voice-modal
+        #voiceModal
+        *ngIf="isVoiceModalOpen"
+        [initialLanguage]="activeLanguage"
+        (closeModal)="isVoiceModalOpen = false"
+        (onVoiceQuery)="handleVoiceQuery($event)"
+      ></app-voice-modal>
     </div>
   `,
   styles: [`
@@ -118,6 +141,9 @@ import { VaultService } from './services/vault.service';
   `]
 })
 export class AppComponent implements OnInit, OnDestroy {
+  @ViewChild('voiceModal') voiceModal?: VoiceModalComponent;
+  @ViewChild('chatBox') chatBox?: ChatBoxComponent;
+
   threads: ThreadSummary[] = [];
   activeThreadId: string = '';
   messages: ChatMessage[] = [];
@@ -126,15 +152,24 @@ export class AppComponent implements OnInit, OnDestroy {
   isSidebarOpen: boolean = false;
   isMobile: boolean = false;
   isVaultOpen: boolean = false;
+  isVoiceModalOpen: boolean = false;
+
+  activeLanguage: string = 'English';
+  selectedModel: string = 'openrouter/free';
+  useRag: boolean = false;
+  useWebSearch: boolean = false;
 
   currentPath: string = window.location.pathname;
 
   private resizeListener = () => this.checkScreenSize();
+  private commandSub?: Subscription;
 
   constructor(
     private chatService: ChatService,
     public authService: AuthService,
-    private vaultService: VaultService
+    private vaultService: VaultService,
+    public themeService: ThemeService,
+    public voiceControlService: VoiceControlService
   ) {}
 
   @HostListener('window:popstate')
@@ -143,10 +178,97 @@ export class AppComponent implements OnInit, OnDestroy {
     this.checkRouteAccess();
   }
 
+  @HostListener('window:keydown', ['$event'])
+  onGlobalKeyDown(event: KeyboardEvent) {
+    // Global hotkey Alt + V to toggle real-time voice mode
+    if (event.altKey && (event.key === 'v' || event.key === 'V')) {
+      event.preventDefault();
+      if (this.authService.isLoggedIn && this.currentPath === '/chat') {
+        this.isVoiceModalOpen = !this.isVoiceModalOpen;
+      }
+    } else if (event.key === 'Escape' && this.isVoiceModalOpen) {
+      this.isVoiceModalOpen = false;
+    }
+  }
+
   ngOnInit() {
     this.checkScreenSize();
     window.addEventListener('resize', this.resizeListener);
     this.checkRouteAccess();
+    this.initVoiceCommandListeners();
+  }
+
+  private initVoiceCommandListeners() {
+    this.commandSub = this.voiceControlService.command$.subscribe((cmd: VoiceCommand) => {
+      this.executeVoiceCommand(cmd);
+    });
+  }
+
+  private executeVoiceCommand(cmd: VoiceCommand) {
+    switch (cmd.action) {
+      case 'NEW_CHAT':
+        this.onNewThread();
+        break;
+      case 'DELETE_CHAT':
+        if (this.activeThreadId) {
+          this.onDeleteThread(this.activeThreadId);
+        }
+        break;
+      case 'TOGGLE_THEME':
+        this.themeService.toggleTheme();
+        break;
+      case 'SET_THEME':
+        if (cmd.payload === 'dark' && !this.themeService.isDark) {
+          this.themeService.toggleTheme();
+        } else if (cmd.payload === 'light' && this.themeService.isDark) {
+          this.themeService.toggleTheme();
+        }
+        break;
+      case 'OPEN_VAULT':
+        this.isVaultOpen = true;
+        break;
+      case 'CLOSE_VAULT':
+        this.isVaultOpen = false;
+        break;
+      case 'TOGGLE_SIDEBAR':
+        this.onToggleSidebar();
+        break;
+      case 'TOGGLE_RAG':
+        this.useRag = cmd.payload;
+        if (this.chatBox) this.chatBox.useRag = this.useRag;
+        break;
+      case 'TOGGLE_WEB':
+        this.useWebSearch = cmd.payload;
+        if (this.chatBox) this.chatBox.useWebSearch = this.useWebSearch;
+        break;
+      case 'SET_LANGUAGE':
+        if (cmd.payload) {
+          this.activeLanguage = cmd.payload;
+          this.voiceControlService.setLanguage(cmd.payload);
+          if (this.chatBox) this.chatBox.selectedLanguage = cmd.payload;
+        }
+        break;
+      case 'SET_MODEL':
+        if (cmd.payload) {
+          this.selectedModel = cmd.payload;
+          if (this.chatBox) this.chatBox.selectedModel = cmd.payload;
+        }
+        break;
+      case 'STOP_SPEAKING':
+        this.voiceControlService.stopSpeaking();
+        break;
+      case 'REPEAT_MESSAGE':
+        const lastAiMsg = [...this.messages].reverse().find(m => m.role === 'assistant' && m.content);
+        if (lastAiMsg) {
+          this.voiceControlService.speakText(lastAiMsg.content);
+        }
+        break;
+      case 'HELP':
+        if (this.voiceModal) {
+          this.voiceModal.showCommands = true;
+        }
+        break;
+    }
   }
 
   navigateTo(path: string) {
@@ -181,19 +303,21 @@ export class AppComponent implements OnInit, OnDestroy {
     this.threads = [];
     this.messages = [];
     this.activeThreadId = '';
+    this.isVoiceModalOpen = false;
+    this.voiceControlService.stopVoiceSession();
     this.navigateTo('/');
   }
 
   ngOnDestroy() {
     window.removeEventListener('resize', this.resizeListener);
+    this.commandSub?.unsubscribe();
+    this.voiceControlService.stopVoiceSession();
   }
 
   private checkScreenSize() {
     this.isMobile = window.innerWidth <= 768;
     if (!this.isMobile) {
       this.isSidebarOpen = true;
-    } else if (this.isSidebarOpen && this.isMobile) {
-      // Keep state or default to closed on initial mobile load
     }
   }
 
@@ -258,12 +382,80 @@ export class AppComponent implements OnInit, OnDestroy {
     });
   }
 
+  // --- Real-time Conversational Voice Chat Handler ---
+  handleVoiceQuery(query: string) {
+    if (!query || !query.trim() || this.isStreaming) return;
+    const userId = this.authService.currentUser?.id || 'guest';
+    const lang = this.voiceControlService.getLanguage() || this.activeLanguage;
+
+    if (!this.activeThreadId) {
+      this.activeThreadId = `${userId}__${this.generateUuid()}`;
+    }
+
+    const userMsg: ChatMessage = { role: 'user', content: query };
+    this.messages.push(userMsg);
+
+    if (this.messages.length === 1) {
+      this.activeTitle = query.length > 40 ? query.substring(0, 40) + '...' : query;
+    }
+
+    const aiMsg: ChatMessage = { role: 'assistant', content: '' };
+    this.messages.push(aiMsg);
+    this.isStreaming = true;
+
+    let accumulatedAiResponse = '';
+
+    // Initialize instant zero-latency streaming TTS queue
+    this.voiceControlService.initSpeechStream();
+
+    this.chatService.sendMessageStream(
+      this.activeThreadId,
+      query,
+      lang,
+      (chunkText) => {
+        aiMsg.content += chunkText;
+        accumulatedAiResponse += chunkText;
+        if (this.voiceModal) {
+          this.voiceModal.updateAiResponse(accumulatedAiResponse, false);
+        }
+        // Feed chunk into streaming TTS immediately! First sentence begins playback in ~200ms
+        this.voiceControlService.enqueueStreamChunk(chunkText);
+      },
+      (error) => {
+        this.isStreaming = false;
+        const errText = typeof error === 'string' ? error : (error?.message || JSON.stringify(error));
+        aiMsg.content += `\n\n⚠️ **Error:** ${errText}`;
+        this.voiceControlService.speakText('Sorry, I encountered an issue generating a response.');
+      },
+      () => {
+        this.isStreaming = false;
+        this.loadThreads();
+        if (this.voiceModal) {
+          this.voiceModal.updateAiResponse(accumulatedAiResponse, true);
+        }
+        // Finalize speech stream so remaining sentences complete and auto-resume listening
+        this.voiceControlService.finishSpeechStream();
+      },
+      this.useRag,
+      userId,
+      (citations) => {
+        aiMsg.citations = citations;
+      },
+      this.useWebSearch,
+      (webSources) => {
+        aiMsg.webSources = webSources;
+      },
+      this.selectedModel
+    );
+  }
+
+  // --- Regular Text Input Chat Handler ---
   handleUserSendMessage(payload: { text: string; language: string; useRag?: boolean; useWebSearch?: boolean; attachedFile?: File; model?: string } | string) {
     const text = typeof payload === 'string' ? payload : payload.text;
-    const language = typeof payload === 'string' ? 'English' : payload.language;
-    const model = typeof payload === 'object' ? payload.model : undefined;
-    const useRag = typeof payload === 'string' ? false : (payload.useRag ?? false);
-    const useWebSearch = typeof payload === 'object' ? (payload.useWebSearch ?? false) : false;
+    const language = typeof payload === 'string' ? this.activeLanguage : payload.language;
+    const model = typeof payload === 'object' ? payload.model : this.selectedModel;
+    const useRag = typeof payload === 'string' ? this.useRag : (payload.useRag ?? this.useRag);
+    const useWebSearch = typeof payload === 'object' ? (payload.useWebSearch ?? this.useWebSearch) : this.useWebSearch;
     const attachedFile = typeof payload === 'object' ? payload.attachedFile : undefined;
     const userId = this.authService.currentUser?.id || 'guest';
 
@@ -337,4 +529,3 @@ export class AppComponent implements OnInit, OnDestroy {
     });
   }
 }
-

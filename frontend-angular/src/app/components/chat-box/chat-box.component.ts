@@ -76,6 +76,18 @@ import { ThemeService } from '../../services/theme.service';
           <span class="rag-dot" [class.on]="useWebSearch"></span>
         </button>
 
+        <!-- Real-Time Conversational Voice Assistant Button -->
+        <button 
+          class="voice-live-header-btn"
+          (click)="openVoiceModal.emit()"
+          title="Start Real-Time Voice Chat & Voice Control (Alt + V)"
+        >
+          <span class="live-mic-pulse"></span>
+          <i class="ri-mic-line"></i>
+          <span class="full-label">Live Voice</span>
+          <span class="short-label">Voice</span>
+        </button>
+
         <button 
           class="header-vault-btn"
           (click)="openVaultModal.emit()"
@@ -975,6 +987,55 @@ import { ThemeService } from '../../services/theme.service';
       box-shadow: 0 0 6px #10b981;
     }
 
+    .voice-live-header-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.25) 0%, rgba(168, 85, 247, 0.25) 100%);
+      border: 1px solid rgba(168, 85, 247, 0.5);
+      border-radius: 20px;
+      padding: 0.25rem 0.75rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #e0e7ff;
+      cursor: pointer;
+      margin-left: 0.4rem;
+      flex-shrink: 0;
+      white-space: nowrap;
+      box-shadow: 0 0 12px rgba(168, 85, 247, 0.3);
+      position: relative;
+      transition: all 0.25s ease;
+    }
+
+    .voice-live-header-btn:hover {
+      background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+      color: #ffffff;
+      border-color: #c084fc;
+      box-shadow: 0 0 18px rgba(168, 85, 247, 0.6);
+      transform: translateY(-1px);
+    }
+
+    .live-mic-pulse {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #34d399;
+      box-shadow: 0 0 8px #34d399;
+      animation: pulse-ring 1.8s infinite;
+    }
+
+    [data-theme="light"] .voice-live-header-btn {
+      background: linear-gradient(135deg, #ede9fe 0%, #fce7f3 100%);
+      border: 1px solid #c084fc;
+      color: #6b21a8;
+      box-shadow: 0 2px 8px rgba(168, 85, 247, 0.2);
+    }
+
+    [data-theme="light"] .voice-live-header-btn:hover {
+      background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+      color: #ffffff;
+    }
+
     .header-vault-btn {
       background: rgba(255, 255, 255, 0.06);
       border: 1px solid var(--border-color);
@@ -1190,6 +1251,7 @@ export class ChatBoxComponent implements OnInit, AfterViewChecked, OnChanges {
   @Output() onSend = new EventEmitter<{ text: string; language: string; useRag: boolean; useWebSearch: boolean; attachedFile?: File; model?: string }>();
   @Output() toggleSidebar = new EventEmitter<void>();
   @Output() openVaultModal = new EventEmitter<void>();
+  @Output() openVoiceModal = new EventEmitter<void>();
 
   @ViewChild('scrollContainer') private scrollContainer!: ElementRef;
 

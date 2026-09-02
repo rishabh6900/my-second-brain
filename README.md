@@ -65,12 +65,16 @@
 
 ---
 
-### 🎙️ Speech & Voice Engine
+### 🎙️ Speech, Real-Time Voice Chat & Voice Control Engine
 | Component | Tool / Library | Description |
 | :--- | :--- | :--- |
+| **Real-Time Voice Assistant** | Web Audio API + Speech API | Full-duplex hands-free live conversation loop with barge-in interruption |
+| **Audio-Reactive Visualizer** | Web Audio `AnalyserNode` | Real-time 3D glowing orb & equalizer waveform reacting to voice intensity |
+| **Voice Control & Intents** | Natural Voice Command Engine | Control theme, new chats, vault, web search, models & languages via voice |
 | **Speech-to-Text (STT)** | `SpeechRecognition` (Google Speech API) | Transcribes 15+ spoken languages with auto audio normalization |
-| **Text-to-Speech (TTS)** | `gTTS` (Google Text-to-Speech) | Converts AI responses into audio MP3 streams |
+| **Text-to-Speech (TTS)** | `SpeechSynthesis` & `gTTS` | Natural, low-latency spoken responses with seamless auto-listen transition |
 | **Supported Languages** | 15+ Multilingual Locales | English, Hindi, Bengali, Tamil, Telugu, Marathi, Gujarati, Kannada, Malayalam, Punjabi, Urdu, Spanish, French, German |
+| **Global Shortcut** | `Alt + V` | Quick toggle for Live Voice Assistant HUD anywhere in the app |
 
 ---
 
