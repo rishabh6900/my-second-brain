@@ -522,22 +522,112 @@ import { ThemeService } from '../../services/theme.service';
       color: inherit;
       font-style: italic;
     }
+    /* Modern IDE Code Blocks */
+    .message-text ::ng-deep .code-block-wrapper {
+      margin: 1rem 0;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: #090d16;
+      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+      position: relative;
+    }
+    .message-text ::ng-deep .code-block-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.45rem 0.9rem;
+      background: rgba(15, 23, 42, 0.95);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      font-family: var(--font-code);
+      font-size: 0.78rem;
+    }
+    .message-text ::ng-deep .code-lang-tag {
+      color: #94a3b8;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .message-text ::ng-deep .copy-code-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #cbd5e1;
+      padding: 3px 9px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-family: var(--font-body);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .message-text ::ng-deep .copy-code-btn:hover {
+      background: rgba(99, 102, 241, 0.2);
+      border-color: rgba(99, 102, 241, 0.5);
+      color: #ffffff;
+    }
+    .message-text ::ng-deep .copy-code-btn.copied {
+      background: rgba(16, 185, 129, 0.2);
+      border-color: rgba(16, 185, 129, 0.5);
+      color: #34d399;
+    }
     .message-text ::ng-deep .md-code-block {
-      background: #0f172a;
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 0.85rem 1rem;
-      margin: 0.75rem 0;
+      background: transparent;
+      border: none;
+      border-radius: 0;
+      padding: 0.95rem 1.15rem;
+      margin: 0;
       overflow-x: auto;
       font-family: var(--font-code);
       font-size: 0.88rem;
-      color: #f8fafc;
+      line-height: 1.6;
+      color: #e2e8f0;
+      -webkit-overflow-scrolling: touch;
     }
-    [data-theme="light"] .message-text ::ng-deep .md-code-block {
+    .message-text ::ng-deep .md-code-block code {
+      font-family: inherit;
+      color: inherit;
+      background: transparent;
+      padding: 0;
+      border: none;
+    }
+    [data-theme="light"] .message-text ::ng-deep .code-block-wrapper {
       background: #0f172a;
-      color: #f8fafc;
-      border: 1px solid #cbd5e1;
+      border: 1px solid #334155;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
     }
+    [data-theme="light"] .message-text ::ng-deep .code-block-header {
+      background: #1e293b;
+      border-bottom: 1px solid #334155;
+    }
+    [data-theme="light"] .message-text ::ng-deep .code-lang-tag {
+      color: #cbd5e1;
+    }
+    [data-theme="light"] .message-text ::ng-deep .copy-code-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+      color: #f1f5f9;
+    }
+    [data-theme="light"] .message-text ::ng-deep .copy-code-btn:hover {
+      background: rgba(99, 102, 241, 0.3);
+      border-color: #6366f1;
+    }
+    .user-bubble .message-text ::ng-deep .code-block-wrapper {
+      background: rgba(10, 15, 30, 0.7);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+    .user-bubble .message-text ::ng-deep .code-block-header {
+      background: rgba(255, 255, 255, 0.1);
+      border-bottom-color: rgba(255, 255, 255, 0.15);
+    }
+    .user-bubble .message-text ::ng-deep .copy-code-btn {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.25);
+      color: #ffffff;
+    }
+
+    /* Inline Code */
     .message-text ::ng-deep .md-inline-code {
       background: rgba(99, 102, 241, 0.15);
       border: 1px solid rgba(99, 102, 241, 0.3);
@@ -569,6 +659,140 @@ import { ThemeService } from '../../services/theme.service';
     }
     .message-text ::ng-deep .md-link:hover {
       color: #818cf8;
+    }
+
+    /* Markdown Tables - Glassmorphism & Clean Typography */
+    .message-text ::ng-deep .md-table-wrapper {
+      width: 100%;
+      max-width: 100%;
+      margin: 0.9rem 0;
+      overflow-x: auto;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      background: rgba(15, 23, 42, 0.6);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      -webkit-overflow-scrolling: touch;
+    }
+    .message-text ::ng-deep .md-table {
+      width: 100%;
+      min-width: 440px;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+      line-height: 1.55;
+      text-align: left;
+    }
+    .message-text ::ng-deep .md-table thead th {
+      background: rgba(99, 102, 241, 0.16);
+      color: var(--text-primary);
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: 0.84rem;
+      text-transform: uppercase;
+      letter-spacing: 0.035em;
+      padding: 0.75rem 1rem;
+      border-bottom: 2px solid var(--border-color);
+      border-right: 1px solid var(--border-color);
+      white-space: nowrap;
+    }
+    .message-text ::ng-deep .md-table thead th:last-child {
+      border-right: none;
+    }
+    .message-text ::ng-deep .md-table tbody td {
+      padding: 0.7rem 1rem;
+      border-bottom: 1px solid var(--border-color);
+      border-right: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      vertical-align: top;
+      transition: background 0.15s ease;
+    }
+    .message-text ::ng-deep .md-table tbody td:last-child {
+      border-right: none;
+    }
+    .message-text ::ng-deep .md-table tbody tr:nth-child(even) {
+      background: rgba(255, 255, 255, 0.025);
+    }
+    .message-text ::ng-deep .md-table tbody tr:hover {
+      background: rgba(99, 102, 241, 0.09);
+    }
+    .message-text ::ng-deep .md-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Light Mode Table Styling */
+    [data-theme="light"] .message-text ::ng-deep .md-table-wrapper {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+    }
+    [data-theme="light"] .message-text ::ng-deep .md-table thead th {
+      background: #f1f5f9;
+      color: #0f172a;
+      border-bottom: 2px solid #cbd5e1;
+      border-right: 1px solid #e2e8f0;
+    }
+    [data-theme="light"] .message-text ::ng-deep .md-table tbody td {
+      border-bottom: 1px solid #e2e8f0;
+      border-right: 1px solid #e2e8f0;
+      color: #334155;
+    }
+    [data-theme="light"] .message-text ::ng-deep .md-table tbody tr:nth-child(even) {
+      background: #f8fafc;
+    }
+    [data-theme="light"] .message-text ::ng-deep .md-table tbody tr:hover {
+      background: rgba(99, 102, 241, 0.07);
+    }
+
+    /* User Bubble Table Overrides */
+    .user-bubble .message-text ::ng-deep .md-table-wrapper {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.25);
+      box-shadow: none;
+    }
+    .user-bubble .message-text ::ng-deep .md-table thead th {
+      background: rgba(255, 255, 255, 0.2);
+      color: #ffffff;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+      border-right: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .user-bubble .message-text ::ng-deep .md-table tbody td {
+      color: #ffffff;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+      border-right: 1px solid rgba(255, 255, 255, 0.15);
+    }
+    .user-bubble .message-text ::ng-deep .md-table tbody tr:nth-child(even) {
+      background: rgba(255, 255, 255, 0.06);
+    }
+    .user-bubble .message-text ::ng-deep .md-table tbody tr:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    /* Horizontal Rules, Blockquotes & Strikethrough */
+    .message-text ::ng-deep .md-hr {
+      border: none;
+      border-top: 1px solid var(--border-color);
+      margin: 1.25rem 0;
+      opacity: 0.8;
+    }
+    .user-bubble .message-text ::ng-deep .md-hr {
+      border-top-color: rgba(255, 255, 255, 0.3);
+    }
+    .message-text ::ng-deep .md-blockquote {
+      border-left: 3px solid var(--accent-primary);
+      background: rgba(99, 102, 241, 0.08);
+      padding: 0.65rem 1rem;
+      margin: 0.75rem 0;
+      border-radius: 0 8px 8px 0;
+      color: var(--text-secondary);
+      font-style: italic;
+    }
+    .user-bubble .message-text ::ng-deep .md-blockquote {
+      border-left-color: #ffffff;
+      background: rgba(255, 255, 255, 0.15);
+      color: #ffffff;
+    }
+    .message-text ::ng-deep .md-del {
+      text-decoration: line-through;
+      opacity: 0.7;
     }
 
     .citations-container {
@@ -1283,6 +1507,35 @@ export class ChatBoxComponent implements OnInit, AfterViewChecked, OnChanges {
   ) {}
 
   ngOnInit(): void {
+    (window as any).copyCodeSnippet = (btn: HTMLElement) => {
+      try {
+        const wrapper = btn.closest('.code-block-wrapper');
+        const codeEl = wrapper ? wrapper.querySelector('code') : null;
+        const textToCopy = codeEl ? codeEl.innerText : '';
+        if (!textToCopy) return;
+
+        navigator.clipboard.writeText(textToCopy).then(() => {
+          const span = btn.querySelector('span');
+          const icon = btn.querySelector('i');
+          const prevText = span ? span.innerText : 'Copy code';
+          
+          btn.classList.add('copied');
+          if (span) span.innerText = 'Copied!';
+          if (icon) icon.className = 'ri-check-line';
+
+          setTimeout(() => {
+            btn.classList.remove('copied');
+            if (span) span.innerText = prevText;
+            if (icon) icon.className = 'ri-file-copy-line';
+          }, 2000);
+        }).catch(err => {
+          console.error('Failed to copy code snippet:', err);
+        });
+      } catch (err) {
+        console.error('Copy snippet error:', err);
+      }
+    };
+
     const saved = localStorage.getItem('lumi_selected_model');
     if (saved) {
       this.selectedModel = saved;
@@ -1354,57 +1607,181 @@ export class ChatBoxComponent implements OnInit, AfterViewChecked, OnChanges {
     return this.sanitizer.bypassSecurityTrustHtml(htmlString);
   }
 
+  private renderMarkdownTables(text: string): string {
+    const lines = text.split('\n');
+    const result: string[] = [];
+    let i = 0;
+
+    const isSeparatorLine = (line: string): boolean => {
+      const trimmed = line.trim();
+      return /^\|?(\s*:?-+:?\s*\|)+\s*:?-+:?\s*\|?$/.test(trimmed) || /^(\s*:?-+:?\s*\|)+\s*:?-+:?\s*$/.test(trimmed);
+    };
+
+    const isTableRow = (line: string): boolean => {
+      const trimmed = line.trim();
+      return trimmed.includes('|') && trimmed.length > 1;
+    };
+
+    const splitRow = (line: string): string[] => {
+      let trimmed = line.trim();
+      if (trimmed.startsWith('|')) {
+        trimmed = trimmed.substring(1);
+      }
+      if (trimmed.endsWith('|')) {
+        trimmed = trimmed.substring(0, trimmed.length - 1);
+      }
+      return trimmed.split('|').map(cell => cell.trim());
+    };
+
+    while (i < lines.length) {
+      if (
+        i + 1 < lines.length &&
+        isTableRow(lines[i]) &&
+        isSeparatorLine(lines[i + 1])
+      ) {
+        const headerCells = splitRow(lines[i]);
+        const separatorCells = splitRow(lines[i + 1]);
+
+        const alignments = separatorCells.map(sep => {
+          const s = sep.trim();
+          const leftColon = s.startsWith(':');
+          const rightColon = s.endsWith(':');
+          if (leftColon && rightColon) return 'center';
+          if (rightColon) return 'right';
+          if (leftColon) return 'left';
+          return 'left';
+        });
+
+        let tableHtml = '<div class="md-table-wrapper"><table class="md-table"><thead><tr>';
+        headerCells.forEach((hCell, colIdx) => {
+          const align = alignments[colIdx] || 'left';
+          const alignStyle = align !== 'left' ? ` style="text-align: ${align};"` : '';
+          tableHtml += `<th${alignStyle}>${hCell}</th>`;
+        });
+        tableHtml += '</tr></thead><tbody>';
+
+        i += 2; // Advance past header and separator rows
+
+        while (i < lines.length && isTableRow(lines[i]) && !isSeparatorLine(lines[i])) {
+          const cells = splitRow(lines[i]);
+          tableHtml += '<tr>';
+          const maxCols = Math.max(headerCells.length, cells.length);
+          for (let colIdx = 0; colIdx < maxCols; colIdx++) {
+            const cellContent = cells[colIdx] !== undefined ? cells[colIdx] : '';
+            const align = alignments[colIdx] || 'left';
+            const alignStyle = align !== 'left' ? ` style="text-align: ${align};"` : '';
+            tableHtml += `<td${alignStyle}>${cellContent}</td>`;
+          }
+          tableHtml += '</tr>';
+          i++;
+        }
+
+        tableHtml += '</tbody></table></div>';
+        result.push(tableHtml);
+      } else {
+        result.push(lines[i]);
+        i++;
+      }
+    }
+
+    return result.join('\n');
+  }
+
   private parseMarkdown(text: string): string {
     if (!text) return '';
 
-    // Basic HTML escaping
+    // 1. Basic HTML escaping
     let str = text
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;');
 
-    // Code blocks ``` ... ```
-    str = str.replace(/```(\w*)\n?([\s\S]*?)```/g, (_match, _lang, code) => {
-      return `<pre class="md-code-block"><code>${code.trim()}</code></pre>`;
+    // 2. Protect Code blocks ``` ... ``` with safe alphanumeric tokens (no underscores/asterisks)
+    const codeBlocks: string[] = [];
+    str = str.replace(/```(\w*)\n?([\s\S]*?)```/g, (_match, lang, code) => {
+      const token = `%%LUMICB${codeBlocks.length}%%`;
+      const trimmedCode = code.trim();
+      const displayLang = lang ? lang.toUpperCase() : 'CODE';
+      const langClass = lang ? ` language-${lang.toLowerCase()}` : '';
+
+      const blockHtml = `<div class="code-block-wrapper"><div class="code-block-header"><span class="code-lang-tag">${displayLang}</span><button class="copy-code-btn" onclick="window.copyCodeSnippet(this)" title="Copy code snippet"><i class="ri-file-copy-line"></i><span>Copy code</span></button></div><pre class="md-code-block${langClass}"><code>${trimmedCode}</code></pre></div>`;
+
+      codeBlocks.push(blockHtml);
+      return token;
     });
 
-    // Inline code `code`
-    str = str.replace(/`([^`]+)`/g, '<code class="md-inline-code">$1</code>');
+    // 3. Protect Inline code `code` with safe alphanumeric tokens
+    const inlineCodes: string[] = [];
+    str = str.replace(/`([^`\n]+)`/g, (_match, code) => {
+      const token = `%%LUMIIC${inlineCodes.length}%%`;
+      inlineCodes.push(`<code class="md-inline-code">${code}</code>`);
+      return token;
+    });
 
-    // Markdown Links [text](url)
+    // 4. Render Markdown Tables
+    str = this.renderMarkdownTables(str);
+
+    // 5. Horizontal Rules (---, ***, ___)
+    str = str.replace(/^(?:---|(?:\*\s*){3,}|(?:_\s*){3,})\s*$/gm, '<hr class="md-hr">');
+
+    // 6. Blockquotes (> ...)
+    str = str.replace(/^\s*&gt;\s*(.*$)/gim, '<blockquote class="md-blockquote">$1</blockquote>');
+
+    // 7. Markdown Links [text](url)
     str = str.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="md-link">$1</a>');
 
-    // Headers ###, ##, #
+    // 8. Headers ###, ##, #
     str = str.replace(/^### (.*$)/gim, '<h3 class="md-h3">$1</h3>');
     str = str.replace(/^## (.*$)/gim, '<h2 class="md-h2">$1</h2>');
     str = str.replace(/^# (.*$)/gim, '<h1 class="md-h1">$1</h1>');
 
-    // Bold **text** and __text__
+    // 9. Strikethrough ~~text~~
+    str = str.replace(/~~(.*?)~~/g, '<del class="md-del">$1</del>');
+
+    // 10. Bold **text** and __text__
     str = str.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
     str = str.replace(/__(.*?)__/g, '<strong>$1</strong>');
 
-    // Italic *text* and _text_
+    // 11. Italic *text* and _text_
     str = str.replace(/\*([^\*\n]+)\*/g, '<em>$1</em>');
     str = str.replace(/_([^_\n]+)_/g, '<em>$1</em>');
 
-    // Bullet lists: convert - item or * item
+    // 12. Bullet lists: convert - item or * item
     str = str.replace(/^\s*[-*]\s+(.*$)/gim, '<li class="md-li">$1</li>');
     str = str.replace(/(<li class="md-li">[\s\S]*?<\/li>\s*)+/g, '<ul class="md-ul">$&</ul>');
 
-    // Numbered lists: convert 1. item
+    // 13. Numbered lists: convert 1. item
     str = str.replace(/^\s*\d+\.\s+(.*$)/gim, '<li class="md-oli">$1</li>');
     str = str.replace(/(<li class="md-oli">[\s\S]*?<\/li>\s*)+/g, '<ol class="md-ol">$&</ol>');
 
-    // Paragraphs and breaks
+    // 14. Paragraphs and breaks
     const blocks = str.split(/\n\n+/);
     str = blocks.map(block => {
       const trimmed = block.trim();
       if (!trimmed) return '';
-      if (trimmed.startsWith('<h') || trimmed.startsWith('<ul') || trimmed.startsWith('<ol') || trimmed.startsWith('<pre')) {
+      if (
+        trimmed.startsWith('<h') ||
+        trimmed.startsWith('<ul') ||
+        trimmed.startsWith('<ol') ||
+        trimmed.startsWith('<pre') ||
+        trimmed.startsWith('<div class="md-table-wrapper"') ||
+        trimmed.startsWith('<div class="code-block-wrapper"') ||
+        trimmed.startsWith('%%LUMICB') ||
+        trimmed.startsWith('<hr') ||
+        trimmed.startsWith('<blockquote')
+      ) {
         return trimmed;
       }
       return `<p class="md-p">${trimmed.replace(/\n/g, '<br>')}</p>`;
     }).join('');
+
+    // 15. Restore Inline Code and Code Blocks
+    inlineCodes.forEach((codeHtml, idx) => {
+      str = str.split(`%%LUMIIC${idx}%%`).join(codeHtml);
+    });
+    codeBlocks.forEach((blockHtml, idx) => {
+      str = str.split(`%%LUMICB${idx}%%`).join(blockHtml);
+    });
 
     return str;
   }
