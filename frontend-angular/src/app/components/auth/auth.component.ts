@@ -50,10 +50,6 @@ import { ThemeService } from '../../services/theme.service';
             <i class="ri-arrow-right-line"></i>
           </button>
 
-          <button *ngIf="!authService.isLoggedIn" class="quick-demo-btn" (click)="onQuickDemo()">
-            <i class="ri-flashlight-line"></i>
-            <span>Guest Demo</span>
-          </button>
         </div>
       </header>
 
@@ -334,14 +330,6 @@ import { ThemeService } from '../../services/theme.service';
                 </ng-container>
               </button>
 
-              <div class="or-divider">
-                <span>OR</span>
-              </div>
-
-              <button type="button" class="guest-btn" (click)="onQuickDemo()">
-                <i class="ri-sparkling-line"></i>
-                <span>Explore as Guest (Instant Access)</span>
-              </button>
             </form>
 
             <!-- Register Form -->
@@ -407,14 +395,6 @@ import { ThemeService } from '../../services/theme.service';
                 </ng-container>
               </button>
 
-              <div class="or-divider">
-                <span>OR</span>
-              </div>
-
-              <button type="button" class="guest-btn" (click)="onQuickDemo()">
-                <i class="ri-sparkling-line"></i>
-                <span>Explore as Guest (Instant Access)</span>
-              </button>
             </form>
 
             <!-- Reset Password Form -->
@@ -1804,17 +1784,12 @@ export class AuthComponent {
     });
   }
 
-  onQuickDemo() {
-    this.authService.demoLogin().subscribe(() => {
-      this.onLoginSuccess.emit();
-    });
-  }
-
   launchWithPrompt(promptText: string) {
     if (this.authService.isLoggedIn) {
       this.navigateToChat.emit();
     } else {
-      this.onQuickDemo();
+      this.activeTab = 'login';
+      this.errorMessage = 'Please log in or create an account to access the workspace.';
     }
   }
 
