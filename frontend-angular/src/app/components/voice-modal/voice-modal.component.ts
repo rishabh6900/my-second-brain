@@ -996,9 +996,10 @@ export class VoiceModalComponent implements OnInit, OnDestroy {
   @Input() initialLanguage: string = 'English';
   @Output() closeModal = new EventEmitter<void>();
   @Output() onVoiceQuery = new EventEmitter<string>();
+  @Output() languageChange = new EventEmitter<string>();
 
   state: VoiceState = 'idle';
-  mode: VoiceMode = 'push-to-talk';
+  mode: VoiceMode = 'auto';
   audioLevel: number = 0;
   selectedLanguage: string = 'English';
   isMuted: boolean = false;
@@ -1084,6 +1085,7 @@ export class VoiceModalComponent implements OnInit, OnDestroy {
 
   onLanguageChange(): void {
     this.voiceService.setLanguage(this.selectedLanguage);
+    this.languageChange.emit(this.selectedLanguage);
   }
 
   toggleMute(): void {

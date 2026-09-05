@@ -164,9 +164,19 @@ def get_system_message(lang_name: str, rag_context: str = "", web_context: str =
     today_str = datetime.utcnow().strftime("%A, %B %d, %Y")
     lang_desc = LANGUAGE_PROMPTS.get(lang_name, lang_name)
     if lang_name in ["English", "English (India)"]:
-        base_prompt = f"You are Lumi, a helpful AI assistant. Today's date is {today_str}. Please respond in clear, natural English."
+        base_prompt = (
+            f"You are Lumi, a helpful AI assistant. Today's date is {today_str}.\n"
+            f"[CRITICAL LANGUAGE INSTRUCTION: The user has explicitly selected the language: {lang_desc}. "
+            f"Regardless of the language of any previous messages in this conversation history, you MUST write your ENTIRE response STRICTLY in {lang_desc}. "
+            f"Do not respond in Hindi, Spanish, or any other language unless the user explicitly requests it in their message.]"
+        )
     else:
-        base_prompt = f"You are Lumi, a helpful AI assistant. Today's date is {today_str}. You MUST write your ENTIRE response strictly in {lang_desc}."
+        base_prompt = (
+            f"You are Lumi, a helpful AI assistant. Today's date is {today_str}.\n"
+            f"[CRITICAL LANGUAGE INSTRUCTION: The user has explicitly selected the language: {lang_desc}. "
+            f"Regardless of the language of any previous messages in this conversation history, you MUST write your ENTIRE response STRICTLY in {lang_desc}. "
+            f"Do not respond in English or any other language unless the user explicitly requests it in their message.]"
+        )
     if rag_context:
         base_prompt += f"\n\nUse the following relevant context from the user's personal Knowledge Vault to answer their query accurately:\n{rag_context}\nIf the answer is found in the context, cite the source document name."
     if web_context:
@@ -191,12 +201,17 @@ def chat(request: ChatRequest):
     db.save_chat_thread(request.thread_id, request.user_id, title)
     db.save_chat_message(request.thread_id, "user", request.message)
 
+    lang_desc = LANGUAGE_PROMPTS.get(request.language, request.language)
+    model_input = request.message
+    if request.language not in ["English", "English (India)"]:
+        model_input = f"{request.message}\n\n[Instruction: Respond strictly and entirely in {lang_desc}]"
+
     try:
         res = chatbot.invoke(
             {
                 "system_prompt": sys_msg.content,
                 "model": request.model,
-                "messages": [HumanMessage(content=request.message)]
+                "messages": [HumanMessage(content=model_input)]
             },
             config=config
         )
@@ -236,6 +251,11 @@ async def chat_stream(request: ChatRequest):
     db.save_chat_thread(request.thread_id, request.user_id, title)
     db.save_chat_message(request.thread_id, "user", request.message)
 
+    lang_desc = LANGUAGE_PROMPTS.get(request.language, request.language)
+    model_input = request.message
+    if request.language not in ["English", "English (India)"]:
+        model_input = f"{request.message}\n\n[Instruction: Respond strictly and entirely in {lang_desc}]"
+
     async def generate():
         full_text = ""
         try:
@@ -243,7 +263,7 @@ async def chat_stream(request: ChatRequest):
                 {
                     "system_prompt": sys_msg.content,
                     "model": request.model,
-                    "messages": [HumanMessage(content=request.message)]
+                    "messages": [HumanMessage(content=model_input)]
                 },
                 config=config,
                 stream_mode="messages",

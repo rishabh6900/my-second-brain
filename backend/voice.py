@@ -20,7 +20,10 @@ def transcribe_audio(audio_bytes, language="English"):
 def text_to_audio(text, language="English"):
     try:
         lang_code = TTS_LANG_MAP.get(language, "en")
-        tts = gTTS(text=text, lang=lang_code)
+        if language == "English (India)":
+            tts = gTTS(text=text, lang="en", tld="co.in")
+        else:
+            tts = gTTS(text=text, lang=lang_code)
         fp = io.BytesIO()
         tts.write_to_fp(fp)
         fp.seek(0)

@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { ChatMessage, ChatService, ModelOption } from '../../services/chat.service';
 import { ThemeService } from '../../services/theme.service';
+import { VoiceControlService } from '../../services/voice-control.service';
 
 @Component({
   selector: 'app-chat-box',
@@ -33,7 +34,7 @@ import { ThemeService } from '../../services/theme.service';
         <!-- Multi-Language Selector -->
         <div class="lang-selector">
           <i class="ri-global-line lang-icon"></i>
-          <select [(ngModel)]="selectedLanguage" class="lang-select" title="Select Chat & Voice Language">
+          <select [(ngModel)]="selectedLanguage" (ngModelChange)="onLanguageChange($event)" class="lang-select" title="Select Chat & Voice Language">
             <option value="English">🇬🇧 English</option>
             <option value="English (India)">🇮🇳 English (India)</option>
             <option value="Hindi">🇮🇳 Hindi (हिंदी)</option>
@@ -1455,8 +1456,14 @@ export class ChatBoxComponent implements OnInit, AfterViewChecked, OnChanges {
   constructor(
     private chatService: ChatService,
     private sanitizer: DomSanitizer,
-    public themeService: ThemeService
+    public themeService: ThemeService,
+    private voiceService: VoiceControlService
   ) {}
+
+  onLanguageChange(lang: string) {
+    this.selectedLanguage = lang;
+    this.voiceService.setLanguage(lang);
+  }
 
   ngOnInit(): void {
     (window as any).copyCodeSnippet = (btn: HTMLElement) => {

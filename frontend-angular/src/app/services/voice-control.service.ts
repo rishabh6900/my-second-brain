@@ -39,7 +39,7 @@ export class VoiceControlService {
   private stateSubject = new BehaviorSubject<VoiceState>('idle');
   public state$: Observable<VoiceState> = this.stateSubject.asObservable();
 
-  private modeSubject = new BehaviorSubject<VoiceMode>('push-to-talk');
+  private modeSubject = new BehaviorSubject<VoiceMode>('auto');
   public mode$: Observable<VoiceMode> = this.modeSubject.asObservable();
 
   private audioLevelSubject = new BehaviorSubject<number>(0);
@@ -127,7 +127,13 @@ export class VoiceControlService {
   public setLanguage(language: string) {
     this.activeLanguageSubject.next(language);
     if (this.recognition) {
-      this.recognition.lang = this.SPEECH_LANG_MAP[language] || 'en-US';
+      const newLang = this.SPEECH_LANG_MAP[language] || 'en-US';
+      this.recognition.lang = newLang;
+      if (this.isRecognitionRunning) {
+        try {
+          this.recognition.stop();
+        } catch (err) {}
+      }
     }
   }
 
@@ -187,51 +193,54 @@ export class VoiceControlService {
             isFinal: !!final
           });
 
-          // In Push-to-Talk mode: NEVER auto-send on silence.
+          if (final) {
+            this.accumulatedTranscript = (this.accumulatedTranscript + ' ' + final).trim();
+          }
+
+          // In Push-to-Talk mode: do not auto-send on silence.
           if (this.getMode() === 'push-to-talk') {
             this.clearSilenceTimers();
-            if (final) {
-              this.accumulatedTranscript = (this.accumulatedTranscript + ' ' + final).trim();
-            }
             return;
           }
 
-          // In Auto Hands-Free Mode: Handle silence countdown safely
+          // In Auto Hands-Free Mode: automatically send when user stops speaking
           if (this.getMode() === 'auto') {
             this.clearSilenceTimers();
 
-            if (final) {
-              this.accumulatedTranscript = (this.accumulatedTranscript + ' ' + final).trim();
-              
-              // Check if direct voice command first
-              const command = this.parseVoiceCommand(this.accumulatedTranscript);
-              if (command) {
-                this.commandSubject.next(command);
-                this.accumulatedTranscript = '';
-                return;
-              }
+            const textCandidate = (this.accumulatedTranscript || currentText).trim();
 
-              // Start 2.0s silence countdown for smooth conversational turn without cutoff
-              let secondsRemaining = 2;
-              this.autoCountdownSubject.next(secondsRemaining);
-
-              this.countdownInterval = setInterval(() => {
-                this.ngZone.run(() => {
-                  secondsRemaining -= 1;
-                  if (secondsRemaining > 0) {
-                    this.autoCountdownSubject.next(secondsRemaining);
-                  } else {
-                    this.clearSilenceTimers();
-                  }
-                });
-              }, 1000);
-
-              this.silenceTimer = setTimeout(() => {
-                this.ngZone.run(() => {
-                  this.finishUserSpeechTurn();
-                });
-              }, 2000);
+            // Check if direct voice command first
+            const command = this.parseVoiceCommand(textCandidate);
+            if (command) {
+              this.commandSubject.next(command);
+              this.accumulatedTranscript = '';
+              return;
             }
+
+            // Start 1.2s silence timer: when user stops speaking, automatically send query
+            this.autoCountdownSubject.next(1);
+            this.silenceTimer = setTimeout(() => {
+              this.ngZone.run(() => {
+                const textToSend = (this.accumulatedTranscript || currentText).trim();
+                this.accumulatedTranscript = '';
+                this.autoCountdownSubject.next(0);
+                if (textToSend) {
+                  this.finishUserSpeechTurn(textToSend);
+                }
+              });
+            }, 1200);
+          }
+        }
+      });
+    };
+
+    this.recognition.onspeechend = () => {
+      this.ngZone.run(() => {
+        if (this.getMode() === 'auto' && !this.isMuted && this.getState() === 'listening') {
+          const textToSend = this.accumulatedTranscript.trim();
+          if (textToSend) {
+            this.clearSilenceTimers();
+            this.finishUserSpeechTurn(textToSend);
           }
         }
       });
@@ -443,8 +452,8 @@ export class VoiceControlService {
   public enqueueStreamChunk(chunkText: string): void {
     this.speechTokenBuffer += chunkText;
 
-    // Detect natural sentence delimiters (. ? ! \n ।) or pause commas after 7+ words
-    const sentenceEndRegex = /([.?!;।\n]+)(\s+|$)/;
+    // Detect natural sentence delimiters (. ? ! \n । Urdu: ۔ ؟) or pause commas after 7+ words
+    const sentenceEndRegex = /([.?!;।۔؟\n]+)(\s+|$)/;
     let match = this.speechTokenBuffer.match(sentenceEndRegex);
 
     while (match && match.index !== undefined) {
@@ -519,26 +528,50 @@ export class VoiceControlService {
       return;
     }
 
-    // Try SpeechSynthesis first (instant, low-latency)
+    const currentLang = this.getLanguage();
+    const langCode = this.SPEECH_LANG_MAP[currentLang] || 'en-US';
+    const targetLangLower = langCode.toLowerCase().replace('_', '-');
+    const targetPrefix = targetLangLower.split('-')[0];
+
+    // Find matched voice in browser speechSynthesis
+    let matchedVoice: SpeechSynthesisVoice | null = null;
     if ('speechSynthesis' in window) {
+      const voices = window.speechSynthesis.getVoices();
+      if (voices.length > 0) {
+        // 1. Exact match with high-quality tag
+        matchedVoice = voices.find(v => 
+          v.lang.replace('_', '-').toLowerCase() === targetLangLower &&
+          (v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('Premium') || v.name.includes('Enhanced') || v.name.includes('Neural'))
+        ) || null;
+
+        // 2. Exact match
+        if (!matchedVoice) {
+          matchedVoice = voices.find(v => v.lang.replace('_', '-').toLowerCase() === targetLangLower) || null;
+        }
+
+        // 3. Language prefix match with quality voices
+        if (!matchedVoice) {
+          matchedVoice = voices.find(v => 
+            v.lang.replace('_', '-').toLowerCase().startsWith(targetPrefix) &&
+            (v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('Premium') || v.name.includes('Enhanced') || v.name.includes('Neural'))
+          ) || null;
+        }
+
+        // 4. Any language prefix match
+        if (!matchedVoice) {
+          matchedVoice = voices.find(v => v.lang.replace('_', '-').toLowerCase().startsWith(targetPrefix)) || null;
+        }
+      }
+    }
+
+    // Only use browser SpeechSynthesis if a genuine voice matching the target language is installed!
+    if (matchedVoice && 'speechSynthesis' in window) {
       try {
         const utterance = new SpeechSynthesisUtterance(cleanText);
-        const langCode = this.SPEECH_LANG_MAP[this.getLanguage()] || 'en-US';
         utterance.lang = langCode;
-        utterance.rate = 1.12; // Natural, energetic conversational tempo
+        utterance.voice = matchedVoice;
+        utterance.rate = 1.12;
         utterance.pitch = 1.0;
-
-        const voices = window.speechSynthesis.getVoices();
-        if (voices.length > 0) {
-          const matchedVoice = voices.find(v => 
-            v.lang.replace('_', '-').toLowerCase().startsWith(langCode.toLowerCase().slice(0, 2)) &&
-            (v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('Premium') || v.name.includes('Enhanced'))
-          ) || voices.find(v => v.lang.replace('_', '-').toLowerCase().startsWith(langCode.toLowerCase().slice(0, 2)));
-
-          if (matchedVoice) {
-            utterance.voice = matchedVoice;
-          }
-        }
 
         utterance.onend = () => {
           this.ngZone.run(() => {
@@ -549,8 +582,9 @@ export class VoiceControlService {
 
         utterance.onerror = (err) => {
           this.ngZone.run(() => {
-            console.warn('SpeechSynthesis error on sentence:', err);
-            onDone();
+            console.warn('SpeechSynthesis error on sentence, falling back to backend TTS:', err);
+            this.currentUtterance = null;
+            this.playBackendTts(cleanText, currentLang, onDone);
           });
         };
 
@@ -562,8 +596,12 @@ export class VoiceControlService {
       }
     }
 
-    // Fallback to backend TTS
-    this.chatService.getTts(cleanText, this.getLanguage()).subscribe({
+    // High-quality backend TTS for all regional languages without local OS voice packs (Punjabi, Bengali, Tamil, Telugu, Gujarati, Marathi, Kannada, Malayalam, Urdu, etc.)
+    this.playBackendTts(cleanText, currentLang, onDone);
+  }
+
+  private playBackendTts(cleanText: string, language: string, onDone: () => void): void {
+    this.chatService.getTts(cleanText, language).subscribe({
       next: (blob) => {
         const audioUrl = URL.createObjectURL(blob);
         const audio = new Audio(audioUrl);
@@ -572,20 +610,29 @@ export class VoiceControlService {
         audio.onended = () => {
           this.ngZone.run(() => {
             this.currentAudioElement = null;
+            try { URL.revokeObjectURL(audioUrl); } catch (e) {}
             onDone();
           });
         };
 
         audio.onerror = () => {
           this.ngZone.run(() => {
+            console.warn('Backend audio playback error');
             this.currentAudioElement = null;
+            try { URL.revokeObjectURL(audioUrl); } catch (e) {}
             onDone();
           });
         };
 
-        audio.play();
+        audio.play().catch(err => {
+          console.warn('Audio play failed:', err);
+          this.currentAudioElement = null;
+          try { URL.revokeObjectURL(audioUrl); } catch (e) {}
+          onDone();
+        });
       },
-      error: () => {
+      error: (err) => {
+        console.warn('Backend TTS request error:', err);
         onDone();
       }
     });

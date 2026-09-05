@@ -78,6 +78,7 @@ import { VoiceControlService, VoiceCommand } from './services/voice-control.serv
         *ngIf="isVoiceModalOpen"
         [initialLanguage]="activeLanguage"
         (closeModal)="isVoiceModalOpen = false"
+        (languageChange)="onVoiceLanguageChange($event)"
         (onVoiceQuery)="handleVoiceQuery($event)"
       ></app-voice-modal>
     </div>
@@ -380,6 +381,13 @@ export class AppComponent implements OnInit, OnDestroy {
       },
       error: (err) => console.error('Error deleting thread', err)
     });
+  }
+
+  onVoiceLanguageChange(lang: string) {
+    this.activeLanguage = lang;
+    if (this.chatBox) {
+      this.chatBox.selectedLanguage = lang;
+    }
   }
 
   // --- Real-time Conversational Voice Chat Handler ---
