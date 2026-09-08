@@ -53,6 +53,18 @@ import { VoiceControlService } from '../../services/voice-control.service';
           </select>
         </div>
 
+        <!-- Private / Incognito Mode Toggle Button -->
+        <button 
+          class="rag-toggle-btn private-toggle-btn"
+          [class.active]="isPrivateMode"
+          (click)="onTogglePrivateMode()"
+          [title]="isPrivateMode ? getPrivateTooltipOn() : getPrivateTooltipOff()"
+        >
+          <span class="full-label">🕵️ {{ getPrivateLabel() }}</span>
+          <span class="short-label">🕵️ {{ getPrivateShortLabel() }}</span>
+          <span class="rag-dot private-dot" [class.on]="isPrivateMode"></span>
+        </button>
+
         <!-- RAG Vault Toggle & Vault Modal Button -->
         <button 
           class="rag-toggle-btn"
@@ -104,6 +116,20 @@ import { VoiceControlService } from '../../services/voice-control.service';
           [title]="themeService.isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
         >
           <i [class]="themeService.isDark ? 'ri-sun-line' : 'ri-moon-line'"></i>
+        </button>
+      </div>
+
+      <!-- Private Mode Banner with Multi-Language Translation -->
+      <div *ngIf="isPrivateMode" class="private-mode-banner">
+        <div class="private-banner-content">
+          <i class="ri-shield-keyhole-fill private-banner-icon"></i>
+          <div class="private-banner-text">
+            <strong>{{ getPrivateBannerTitle() }}</strong>
+            <span>{{ getPrivateBannerDescription() }}</span>
+          </div>
+        </div>
+        <button class="private-banner-close" (click)="onTogglePrivateMode()" [title]="getPrivateTooltipOn()">
+          <i class="ri-close-line"></i>
         </button>
       </div>
 
@@ -592,23 +618,28 @@ import { VoiceControlService } from '../../services/voice-control.service';
       padding: 0;
       border: none;
     }
+    :host-context([data-theme="light"]) .message-text ::ng-deep .code-block-wrapper,
     [data-theme="light"] .message-text ::ng-deep .code-block-wrapper {
       background: #0f172a;
       border: 1px solid #334155;
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
     }
+    :host-context([data-theme="light"]) .message-text ::ng-deep .code-block-header,
     [data-theme="light"] .message-text ::ng-deep .code-block-header {
       background: #1e293b;
       border-bottom: 1px solid #334155;
     }
+    :host-context([data-theme="light"]) .message-text ::ng-deep .code-lang-tag,
     [data-theme="light"] .message-text ::ng-deep .code-lang-tag {
       color: #cbd5e1;
     }
+    :host-context([data-theme="light"]) .message-text ::ng-deep .copy-code-btn,
     [data-theme="light"] .message-text ::ng-deep .copy-code-btn {
       background: rgba(255, 255, 255, 0.1);
       border-color: rgba(255, 255, 255, 0.2);
       color: #f1f5f9;
     }
+    :host-context([data-theme="light"]) .message-text ::ng-deep .copy-code-btn:hover,
     [data-theme="light"] .message-text ::ng-deep .copy-code-btn:hover {
       background: rgba(99, 102, 241, 0.3);
       border-color: #6366f1;
@@ -638,6 +669,7 @@ import { VoiceControlService } from '../../services/voice-control.service';
       color: #818cf8;
       font-weight: 600;
     }
+    :host-context([data-theme="light"]) .message-text ::ng-deep .md-inline-code,
     [data-theme="light"] .message-text ::ng-deep .md-inline-code {
       background: rgba(99, 102, 241, 0.1);
       border-color: rgba(99, 102, 241, 0.25);
@@ -654,6 +686,7 @@ import { VoiceControlService } from '../../services/voice-control.service';
       font-weight: 500;
       transition: color 0.2s ease;
     }
+    :host-context([data-theme="light"]) .message-text ::ng-deep .md-link,
     [data-theme="light"] .message-text ::ng-deep .md-link {
       color: #4f46e5;
     }
@@ -661,47 +694,48 @@ import { VoiceControlService } from '../../services/voice-control.service';
       color: #818cf8;
     }
 
-    /* Markdown Tables - Glassmorphism & Clean Typography */
+    /* Markdown Tables - Premium Glassmorphism & High-Contrast Typography */
     .message-text ::ng-deep .md-table-wrapper {
       width: 100%;
       max-width: 100%;
-      margin: 0.9rem 0;
+      margin: 1rem 0;
       overflow-x: auto;
       border-radius: 12px;
-      border: 1px solid var(--border-color);
-      background: rgba(15, 23, 42, 0.6);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--table-border);
+      background: var(--table-bg);
+      box-shadow: var(--table-shadow);
       -webkit-overflow-scrolling: touch;
+      transition: all 0.2s ease;
     }
     .message-text ::ng-deep .md-table {
       width: 100%;
       min-width: 440px;
       border-collapse: collapse;
-      font-size: 0.88rem;
-      line-height: 1.55;
+      font-size: 0.9rem;
+      line-height: 1.6;
       text-align: left;
     }
     .message-text ::ng-deep .md-table thead th {
-      background: rgba(99, 102, 241, 0.16);
-      color: var(--text-primary);
+      background: var(--table-th-bg);
+      color: var(--table-th-text);
       font-family: var(--font-heading);
       font-weight: 700;
-      font-size: 0.84rem;
+      font-size: 0.82rem;
       text-transform: uppercase;
-      letter-spacing: 0.035em;
-      padding: 0.75rem 1rem;
-      border-bottom: 2px solid var(--border-color);
-      border-right: 1px solid var(--border-color);
+      letter-spacing: 0.05em;
+      padding: 0.8rem 1.1rem;
+      border-bottom: 2px solid var(--table-th-border);
+      border-right: 1px solid var(--table-td-border);
       white-space: nowrap;
     }
     .message-text ::ng-deep .md-table thead th:last-child {
       border-right: none;
     }
     .message-text ::ng-deep .md-table tbody td {
-      padding: 0.7rem 1rem;
-      border-bottom: 1px solid var(--border-color);
-      border-right: 1px solid var(--border-color);
-      color: var(--text-secondary);
+      padding: 0.75rem 1.1rem;
+      border-bottom: 1px solid var(--table-td-border);
+      border-right: 1px solid var(--table-td-border);
+      color: var(--table-td-text);
       vertical-align: top;
       transition: background 0.15s ease;
     }
@@ -709,37 +743,42 @@ import { VoiceControlService } from '../../services/voice-control.service';
       border-right: none;
     }
     .message-text ::ng-deep .md-table tbody tr:nth-child(even) {
-      background: rgba(255, 255, 255, 0.025);
+      background: var(--table-tr-even);
     }
     .message-text ::ng-deep .md-table tbody tr:hover {
-      background: rgba(99, 102, 241, 0.09);
+      background: var(--table-tr-hover);
     }
     .message-text ::ng-deep .md-table tbody tr:last-child td {
       border-bottom: none;
     }
 
-    /* Light Mode Table Styling */
+    /* Light Mode Table Styling Explicit Direct Overrides */
+    :host-context([data-theme="light"]) .message-text ::ng-deep .md-table-wrapper,
     [data-theme="light"] .message-text ::ng-deep .md-table-wrapper {
-      background: #ffffff;
-      border: 1px solid #cbd5e1;
-      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+      background: #ffffff !important;
+      border: 1px solid #e2e8f0 !important;
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06) !important;
     }
+    :host-context([data-theme="light"]) .message-text ::ng-deep .md-table thead th,
     [data-theme="light"] .message-text ::ng-deep .md-table thead th {
-      background: #f1f5f9;
-      color: #0f172a;
-      border-bottom: 2px solid #cbd5e1;
-      border-right: 1px solid #e2e8f0;
+      background: linear-gradient(135deg, #f1f5f9 0%, #eef2ff 100%) !important;
+      color: #0f172a !important;
+      border-bottom: 2px solid #cbd5e1 !important;
+      border-right: 1px solid #e2e8f0 !important;
     }
+    :host-context([data-theme="light"]) .message-text ::ng-deep .md-table tbody td,
     [data-theme="light"] .message-text ::ng-deep .md-table tbody td {
-      border-bottom: 1px solid #e2e8f0;
-      border-right: 1px solid #e2e8f0;
-      color: #334155;
+      border-bottom: 1px solid #f1f5f9 !important;
+      border-right: 1px solid #f1f5f9 !important;
+      color: #1e293b !important;
     }
+    :host-context([data-theme="light"]) .message-text ::ng-deep .md-table tbody tr:nth-child(even),
     [data-theme="light"] .message-text ::ng-deep .md-table tbody tr:nth-child(even) {
-      background: #f8fafc;
+      background: #f8fafc !important;
     }
+    :host-context([data-theme="light"]) .message-text ::ng-deep .md-table tbody tr:hover,
     [data-theme="light"] .message-text ::ng-deep .md-table tbody tr:hover {
-      background: rgba(99, 102, 241, 0.07);
+      background: #eef2ff !important;
     }
 
     /* User Bubble Table Overrides */
@@ -1019,12 +1058,14 @@ import { VoiceControlService } from '../../services/voice-control.service';
       box-shadow: 0 2px 12px var(--accent-glow);
     }
 
+    :host-context([data-theme="light"]) .model-selector,
     [data-theme="light"] .model-selector {
       background: #ffffff;
       border: 1px solid #e2e8f0;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
     }
 
+    :host-context([data-theme="light"]) .model-selector:hover,
     [data-theme="light"] .model-selector:hover {
       background: #f8fafc;
       border-color: var(--accent-primary);
@@ -1036,6 +1077,7 @@ import { VoiceControlService } from '../../services/voice-control.service';
       flex-shrink: 0;
     }
 
+    :host-context([data-theme="light"]) .model-icon,
     [data-theme="light"] .model-icon {
       color: #0284c7;
     }
@@ -1060,6 +1102,7 @@ import { VoiceControlService } from '../../services/voice-control.service';
       padding: 6px 10px;
     }
 
+    :host-context([data-theme="light"]) .model-select option,
     [data-theme="light"] .model-select option {
       background: #ffffff;
       color: #0f172a;
@@ -1084,12 +1127,14 @@ import { VoiceControlService } from '../../services/voice-control.service';
       box-shadow: 0 2px 12px var(--accent-glow);
     }
 
+    :host-context([data-theme="light"]) .lang-selector,
     [data-theme="light"] .lang-selector {
       background: #ffffff;
       border: 1px solid #e2e8f0;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
     }
 
+    :host-context([data-theme="light"]) .lang-selector:hover,
     [data-theme="light"] .lang-selector:hover {
       background: #f8fafc;
       border-color: var(--accent-primary);
@@ -1117,6 +1162,7 @@ import { VoiceControlService } from '../../services/voice-control.service';
       color: var(--text-primary);
     }
 
+    :host-context([data-theme="light"]) .lang-select option,
     [data-theme="light"] .lang-select option {
       background: #ffffff;
       color: #0f172a;
@@ -1163,6 +1209,7 @@ import { VoiceControlService } from '../../services/voice-control.service';
       box-shadow: 0 2px 12px var(--accent-glow);
     }
 
+    :host-context([data-theme="light"]) .rag-toggle-btn,
     [data-theme="light"] .rag-toggle-btn {
       background: #ffffff;
       border: 1px solid #e2e8f0;
@@ -1170,6 +1217,7 @@ import { VoiceControlService } from '../../services/voice-control.service';
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
     }
 
+    :host-context([data-theme="light"]) .rag-toggle-btn:hover,
     [data-theme="light"] .rag-toggle-btn:hover {
       background: #f8fafc;
       border-color: var(--accent-primary);
@@ -1177,11 +1225,12 @@ import { VoiceControlService } from '../../services/voice-control.service';
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     }
 
+    :host-context([data-theme="light"]) .rag-toggle-btn.active,
     [data-theme="light"] .rag-toggle-btn.active {
-      background: #ede9fe;
-      border-color: #818cf8;
-      color: #4338ca;
-      box-shadow: 0 2px 10px rgba(99, 102, 241, 0.2);
+      background: #ede9fe !important;
+      border-color: #818cf8 !important;
+      color: #4338ca !important;
+      box-shadow: 0 2px 10px rgba(99, 102, 241, 0.2) !important;
     }
 
     .web-toggle-btn.active {
@@ -1191,11 +1240,27 @@ import { VoiceControlService } from '../../services/voice-control.service';
       box-shadow: 0 2px 12px rgba(56, 189, 248, 0.25) !important;
     }
 
+    :host-context([data-theme="light"]) .web-toggle-btn.active,
     [data-theme="light"] .web-toggle-btn.active {
       background: #e0f2fe !important;
       border-color: #38bdf8 !important;
       color: #0284c7 !important;
       box-shadow: 0 2px 10px rgba(56, 189, 248, 0.25) !important;
+    }
+
+    .private-toggle-btn.active {
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.25), rgba(126, 34, 206, 0.25)) !important;
+      border-color: rgba(168, 85, 247, 0.6) !important;
+      color: #c084fc !important;
+      box-shadow: 0 2px 14px rgba(168, 85, 247, 0.3) !important;
+    }
+
+    :host-context([data-theme="light"]) .private-toggle-btn.active,
+    [data-theme="light"] .private-toggle-btn.active {
+      background: #f3e8ff !important;
+      border-color: #a855f7 !important;
+      color: #7e22ce !important;
+      box-shadow: 0 2px 10px rgba(168, 85, 247, 0.2) !important;
     }
 
     .rag-dot {
@@ -1211,7 +1276,124 @@ import { VoiceControlService } from '../../services/voice-control.service';
       box-shadow: 0 0 6px #10b981;
     }
 
+    .rag-dot.private-dot.on {
+      background: #c084fc !important;
+      box-shadow: 0 0 8px #c084fc !important;
+    }
 
+    /* Multi-Language Private Mode Banner */
+    .private-mode-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.65rem 1.25rem;
+      background: linear-gradient(90deg, rgba(88, 28, 135, 0.3) 0%, rgba(126, 34, 206, 0.18) 100%);
+      border-bottom: 1px solid rgba(168, 85, 247, 0.35);
+      backdrop-filter: blur(8px);
+      z-index: 10;
+      animation: fadeInBanner 0.3s ease-in-out;
+    }
+
+    @keyframes fadeInBanner {
+      from { opacity: 0; transform: translateY(-6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .private-banner-content {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      color: #e9d5ff;
+    }
+
+    .private-banner-icon {
+      font-size: 1.25rem;
+      color: #c084fc;
+      filter: drop-shadow(0 0 6px rgba(192, 132, 252, 0.6));
+    }
+
+    .private-banner-text {
+      display: flex;
+      flex-direction: column;
+      gap: 0.1rem;
+      font-size: 0.82rem;
+      line-height: 1.35;
+    }
+
+    .private-banner-text strong {
+      font-size: 0.86rem;
+      color: #f3e8ff;
+      letter-spacing: 0.02em;
+    }
+
+    .private-banner-text span {
+      color: #d8b4fe;
+      opacity: 0.92;
+    }
+
+    .private-banner-close {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(168, 85, 247, 0.3);
+      border-radius: 6px;
+      color: #e9d5ff;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .private-banner-close:hover {
+      background: rgba(168, 85, 247, 0.3);
+      color: #ffffff;
+      transform: scale(1.05);
+    }
+
+    :host-context([data-theme="light"]) .private-mode-banner,
+    [data-theme="light"] .private-mode-banner {
+      background: linear-gradient(90deg, #faf5ff 0%, #f3e8ff 100%) !important;
+      border-bottom: 1px solid #d8b4fe !important;
+    }
+
+    :host-context([data-theme="light"]) .private-banner-content,
+    [data-theme="light"] .private-banner-content {
+      color: #581c87 !important;
+    }
+
+    :host-context([data-theme="light"]) .private-banner-icon,
+    [data-theme="light"] .private-banner-icon {
+      color: #7e22ce !important;
+      filter: none !important;
+    }
+
+    :host-context([data-theme="light"]) .private-banner-text strong,
+    [data-theme="light"] .private-banner-text strong {
+      color: #581c87 !important;
+      font-weight: 700 !important;
+    }
+
+    :host-context([data-theme="light"]) .private-banner-text span,
+    [data-theme="light"] .private-banner-text span {
+      color: #6b21a8 !important;
+      font-weight: 500 !important;
+      opacity: 1 !important;
+    }
+
+    :host-context([data-theme="light"]) .private-banner-close,
+    [data-theme="light"] .private-banner-close {
+      background: #ffffff !important;
+      border: 1px solid #d8b4fe !important;
+      color: #6b21a8 !important;
+      box-shadow: 0 1px 4px rgba(126, 34, 206, 0.1) !important;
+    }
+
+    :host-context([data-theme="light"]) .private-banner-close:hover,
+    [data-theme="light"] .private-banner-close:hover {
+      background: #ede9fe !important;
+      color: #4c1d95 !important;
+    }
 
     .header-vault-btn {
       background: rgba(255, 255, 255, 0.06);
@@ -1238,12 +1420,14 @@ import { VoiceControlService } from '../../services/voice-control.service';
       transform: translateY(-1px);
     }
 
+    :host-context([data-theme="light"]) .header-vault-btn,
     [data-theme="light"] .header-vault-btn {
       background: #ffffff;
       border: 1px solid #e2e8f0;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
     }
 
+    :host-context([data-theme="light"]) .header-vault-btn:hover,
     [data-theme="light"] .header-vault-btn:hover {
       background: #f8fafc;
       border-color: var(--accent-primary);
@@ -1276,6 +1460,7 @@ import { VoiceControlService } from '../../services/voice-control.service';
       transform: translateY(-1px);
     }
 
+    :host-context([data-theme="light"]) .theme-btn,
     [data-theme="light"] .theme-btn {
       background: #ffffff;
       border: 1px solid #e2e8f0;
@@ -1283,6 +1468,7 @@ import { VoiceControlService } from '../../services/voice-control.service';
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
     }
 
+    :host-context([data-theme="light"]) .theme-btn:hover,
     [data-theme="light"] .theme-btn:hover {
       background: #f8fafc;
       border-color: var(--accent-primary);
@@ -1424,11 +1610,13 @@ export class ChatBoxComponent implements OnInit, AfterViewChecked, OnChanges {
   @Input() activeTitle: string = '';
   @Input() threadId: string = '';
   @Input() isStreaming: boolean = false;
+  @Input() isPrivateMode: boolean = false;
 
-  @Output() onSend = new EventEmitter<{ text: string; language: string; useRag: boolean; useWebSearch: boolean; attachedFile?: File; model?: string }>();
+  @Output() onSend = new EventEmitter<{ text: string; language: string; useRag: boolean; useWebSearch: boolean; attachedFile?: File; model?: string; isPrivate?: boolean }>();
   @Output() toggleSidebar = new EventEmitter<void>();
   @Output() openVaultModal = new EventEmitter<void>();
   @Output() openVoiceModal = new EventEmitter<void>();
+  @Output() togglePrivate = new EventEmitter<boolean>();
 
   @ViewChild('scrollContainer') private scrollContainer!: ElementRef;
 
@@ -1745,6 +1933,157 @@ export class ChatBoxComponent implements OnInit, AfterViewChecked, OnChanges {
     return str;
   }
 
+  private readonly PRIVATE_TRANSLATIONS: Record<string, { label: string; short: string; title: string; desc: string; tipOn: string; tipOff: string }> = {
+    'English': {
+      label: 'Private Mode',
+      short: 'Private',
+      title: 'Private Mode Active',
+      desc: 'Messages and AI responses are ephemeral and will NOT be stored in your chat history or database.',
+      tipOn: 'Private Mode ON (Click to exit)',
+      tipOff: 'Private Mode OFF (Click to start private chat)'
+    },
+    'English (India)': {
+      label: 'Private Mode',
+      short: 'Private',
+      title: 'Private Mode Active',
+      desc: 'Messages and AI responses are ephemeral and will NOT be stored in your chat history or database.',
+      tipOn: 'Private Mode ON (Click to exit)',
+      tipOff: 'Private Mode OFF (Click to start private chat)'
+    },
+    'Hindi': {
+      label: 'निजी मोड',
+      short: 'निजी',
+      title: 'निजी मोड सक्रिय है',
+      desc: 'संदेश और AI उत्तर अस्थायी हैं और आपके इतिहास या डेटाबेस में सहेजे नहीं जाएंगे।',
+      tipOn: 'निजी मोड चालू (बाहर निकलने के लिए क्लिक करें)',
+      tipOff: 'निजी मोड बंद (निजी चैट शुरू करने के लिए क्लिक करें)'
+    },
+    'Bengali': {
+      label: 'প্রাইভেট মোড',
+      short: 'প্রাইভেট',
+      title: 'প্রাইভেট মোড সক্রিয়',
+      desc: 'বার্তা এবং AI প্রতিক্রিয়াগুলি অস্থায়ী এবং আপনার ইতিহাস বা ডেটাবেসে সংরক্ষিত হবে না।',
+      tipOn: 'প্রাইভেট মোড চালু (প্রস্থান করতে ক্লিক করুন)',
+      tipOff: 'প্রাইভেট মোড বন্ধ (প্রাইভেট চ্যাট শুরু করুন)'
+    },
+    'Tamil': {
+      label: 'தனிப்பட்ட முறை',
+      short: 'தனிப்பட்ட',
+      title: 'தனிப்பட்ட முறை செயலில் உள்ளது',
+      desc: 'செய்திகள் மற்றும் AI பதில்கள் தற்காலிகமானவை மற்றும் உங்கள் வரலாற்றில் சேமிக்கப்படாது.',
+      tipOn: 'தனிப்பட்ட முறை ஆன் (வெளியேற கிளிக் செய்க)',
+      tipOff: 'தனிப்பட்ட முறை ஆஃப் (தொடங்க கிளிக் செய்க)'
+    },
+    'Telugu': {
+      label: 'ప్రైవేట్ మోడ్',
+      short: 'ప్రైవేట్',
+      title: 'ప్రైవేట్ మోడ్ యాక్టివ్‌లో ఉంది',
+      desc: 'సందేశాలు మరియు AI సమాధానాలు తాత్కాలికం మరియు మీ హిస్టరీ లేదా డేటాబేస్‌లో సేవ్ కావు.',
+      tipOn: 'ప్రైవేట్ మోడ్ ఆన్ (నిష్క్రమించడానికి క్లిక్ చేయండి)',
+      tipOff: 'ప్రైవేట్ మోడ్ ఆఫ్ (ప్రారంభించడానికి క్లిక్ చేయండి)'
+    },
+    'Marathi': {
+      label: 'खाजगी मोड',
+      short: 'खाजगी',
+      title: 'खाजगी मोड सक्रिय आहे',
+      desc: 'संदेश आणि AI उत्तरे तात्पुरती आहेत आणि तुमच्या इतिहासामध्ये सेव्ह केली जाणार नाहीत.',
+      tipOn: 'खाजगी मोड चालू (बाहेर पडण्यासाठी क्लिक करा)',
+      tipOff: 'खाजगी मोड बंद (खाजगी चॅट सुरू करा)'
+    },
+    'Gujarati': {
+      label: 'ખાનગી મોડ',
+      short: 'ખાનગી',
+      title: 'ખાનગી મોડ સક્રિય છે',
+      desc: 'સંદેશાઓ અને AI જવાબો અસ્થાયી છે અને તમારા ઇતિહાસમાં સાચવવામાં આવશે નહીં.',
+      tipOn: 'ખાનગી મોડ ચાલુ (બહાર નીકળવા ક્લિક કરો)',
+      tipOff: 'ખાનગી મોડ બંધ (ખાનગી ચેટ શરૂ કરો)'
+    },
+    'Kannada': {
+      label: 'ಖಾಸಗಿ ಮೋಡ್',
+      short: 'ಖಾಸಗಿ',
+      title: 'ಖಾಸಗಿ ಮೋಡ್ ಸಕ್ರಿಯವಾಗಿದೆ',
+      desc: 'ಸಂದೇಶಗಳು ಮತ್ತು AI ಪ್ರತಿಕ್ರಿಯೆಗಳು ತಾತ್ಕಾಲಿಕವಾಗಿದ್ದು ಇತಿಹಾಸದಲ್ಲಿ ಉಳಿಸಲಾಗುವುದಿಲ್ಲ.',
+      tipOn: 'ಖಾಸಗಿ ಮೋಡ್ ಆನ್ (ನಿರ್ಗಮಿಸಲು ಕ್ಲಿಕ್ ಮಾಡಿ)',
+      tipOff: 'ಖಾಸಗಿ ಮೋಡ್ ಆಫ್ (ಪ್ರಾರಂಭಿಸಲು ಕ್ಲಿಕ್ ಮಾಡಿ)'
+    },
+    'Malayalam': {
+      label: 'സ്വകാര്യ മോഡ്',
+      short: 'സ്വകാര്യ',
+      title: 'സ്വകാര്യ മോഡ് സജീവമാണ്',
+      desc: 'സന്ദേശങ്ങളും AI മറുപടികളും താൽക്കാലികമാണ്, ചരിത്രത്തിൽ സൂക്ഷിക്കപ്പെടില്ല.',
+      tipOn: 'സ്വകാര്യ മോഡ് ഓൺ (പുറത്തുകടക്കാൻ ക്ലിക്ക് ചെയ്യുക)',
+      tipOff: 'സ്വകാര്യ മോഡ് ഓഫ് (ആരംഭിക്കാൻ ക്ലിക്ക് ചെയ്യുക)'
+    },
+    'Punjabi': {
+      label: 'ਨਿੱਜੀ ਮੋਡ',
+      short: 'ਨਿੱਜੀ',
+      title: 'ਨਿੱਜੀ ਮੋਡ ਕਿਰਿਆਸ਼ੀਲ ਹੈ',
+      desc: 'ਸੁਨੇਹੇ ਅਤੇ AI ਜਵਾਬ ਅਸਥਾਈ ਹਨ ਅਤੇ ਤੁਹਾਡੇ ਇਤਿਹਾਸ ਵਿੱਚ ਸੁਰੱਖਿਅਤ ਨਹੀਂ ਕੀਤੇ ਜਾਣਗੇ।',
+      tipOn: 'ਨਿੱਜੀ ਮੋਡ ਚਾਲੂ (ਬਾਹਰ ਨਿਕਲਣ ਲਈ ਕਲਿੱਕ ਕਰੋ)',
+      tipOff: 'ਨਿੱਜੀ ਮੋਡ ਬੰਦ (ਨਿੱਜੀ ਗੱਲਬਾਤ ਸ਼ੁਰੂ ਕਰੋ)'
+    },
+    'Urdu': {
+      label: 'پرائیویٹ موڈ',
+      short: 'پرائیویٹ',
+      title: 'پرائیویٹ موڈ فعال ہے',
+      desc: 'پیغامات اور جوابات عارضی ہیں اور آپ کی ہسٹری یا ڈیٹا بیس میں محفوظ نہیں ہوں گے۔',
+      tipOn: 'پرائیویٹ موڈ آن (باہر نکلنے کے لیے کلک کریں)',
+      tipOff: 'پرائیویٹ موڈ آف (شروع کرنے کے لیے کلک کریں)'
+    },
+    'Spanish': {
+      label: 'Modo Privado',
+      short: 'Privado',
+      title: 'Modo Privado Activo',
+      desc: 'Los mensajes y respuestas son efímeros y NO se guardarán en tu historial ni base de datos.',
+      tipOn: 'Modo Privado ACTIVADO (Haz clic para salir)',
+      tipOff: 'Modo Privado DESACTIVADO (Haz clic para iniciar)'
+    },
+    'French': {
+      label: 'Mode Privé',
+      short: 'Privé',
+      title: 'Mode Privé Actif',
+      desc: 'Les messages et réponses sont éphémères et ne seront PAS enregistrés dans votre historique.',
+      tipOn: 'Mode Privé ACTIVÉ (Cliquez pour quitter)',
+      tipOff: 'Mode Privé DÉSACTIVÉ (Cliquez pour démarrer)'
+    },
+    'German': {
+      label: 'Privater Modus',
+      short: 'Privat',
+      title: 'Privater Modus Aktiv',
+      desc: 'Nachrichten und Antworten sind flüchtig und werden NICHT in Ihrem Verlauf gespeichert.',
+      tipOn: 'Privater Modus AN (Klicken zum Beenden)',
+      tipOff: 'Privater Modus AUS (Klicken zum Starten)'
+    }
+  };
+
+  getPrivateLabel(): string {
+    return this.PRIVATE_TRANSLATIONS[this.selectedLanguage]?.label || 'Private Mode';
+  }
+
+  getPrivateShortLabel(): string {
+    return this.PRIVATE_TRANSLATIONS[this.selectedLanguage]?.short || 'Private';
+  }
+
+  getPrivateBannerTitle(): string {
+    return this.PRIVATE_TRANSLATIONS[this.selectedLanguage]?.title || 'Private Mode Active';
+  }
+
+  getPrivateBannerDescription(): string {
+    return this.PRIVATE_TRANSLATIONS[this.selectedLanguage]?.desc || 'Messages and AI responses are ephemeral and will NOT be stored in your chat history or database.';
+  }
+
+  getPrivateTooltipOn(): string {
+    return this.PRIVATE_TRANSLATIONS[this.selectedLanguage]?.tipOn || 'Private Mode ON (Click to exit)';
+  }
+
+  getPrivateTooltipOff(): string {
+    return this.PRIVATE_TRANSLATIONS[this.selectedLanguage]?.tipOff || 'Private Mode OFF (Click to start private chat)';
+  }
+
+  onTogglePrivateMode(): void {
+    this.togglePrivate.emit(!this.isPrivateMode);
+  }
+
   onAttachmentSelected(event: any) {
     if (event.target.files && event.target.files.length > 0) {
       this.attachedFile = event.target.files[0];
@@ -1765,7 +2104,8 @@ export class ChatBoxComponent implements OnInit, AfterViewChecked, OnChanges {
       useRag: this.useRag,
       useWebSearch: this.useWebSearch,
       attachedFile: file,
-      model: this.selectedModel
+      model: this.selectedModel,
+      isPrivate: this.isPrivateMode
     });
   }
 
@@ -1775,7 +2115,8 @@ export class ChatBoxComponent implements OnInit, AfterViewChecked, OnChanges {
       language: this.selectedLanguage,
       useRag: this.useRag,
       useWebSearch: this.useWebSearch,
-      model: this.selectedModel
+      model: this.selectedModel,
+      isPrivate: this.isPrivateMode
     });
   }
 

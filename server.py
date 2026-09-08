@@ -44,6 +44,7 @@ class ChatRequest(BaseModel):
     use_rag: bool = False
     use_web_search: bool = False
     user_id: str | None = None
+    is_private: bool = False
 
 
 class URLIngestRequest(BaseModel):
@@ -197,9 +198,10 @@ def chat(request: ChatRequest):
         web_context, web_sources = perform_web_search(request.message)
 
     sys_msg = get_system_message(request.language, rag_context, web_context)
-    title = request.message[:40] + ("..." if len(request.message) > 40 else "")
-    db.save_chat_thread(request.thread_id, request.user_id, title)
-    db.save_chat_message(request.thread_id, "user", request.message)
+    if not request.is_private:
+        title = request.message[:40] + ("..." if len(request.message) > 40 else "")
+        db.save_chat_thread(request.thread_id, request.user_id, title)
+        db.save_chat_message(request.thread_id, "user", request.message)
 
     lang_desc = LANGUAGE_PROMPTS.get(request.language, request.language)
     model_input = request.message
@@ -221,11 +223,22 @@ def chat(request: ChatRequest):
         raise HTTPException(status_code=500, detail=str(e))
     
     citations = [{"title": h["title"], "score": round(h["score"], 2)} for h in hits]
-    saved_ai_msg = db.save_chat_message(
-        request.thread_id, "assistant", ai_msg.content,
-        citations=citations if citations else None,
-        web_sources=web_sources if web_sources else None
-    )
+    if not request.is_private:
+        saved_ai_msg = db.save_chat_message(
+            request.thread_id, "assistant", ai_msg.content,
+            citations=citations if citations else None,
+            web_sources=web_sources if web_sources else None
+        )
+    else:
+        saved_ai_msg = {
+            "id": str(uuid.uuid4()),
+            "role": "assistant",
+            "content": ai_msg.content,
+            "citations": citations if citations else None,
+            "webSources": web_sources if web_sources else None,
+            "createdAt": datetime.utcnow().isoformat() + "Z",
+            "isPrivate": True
+        }
     return {
         "threadId": request.thread_id,
         "message": saved_ai_msg
@@ -247,9 +260,10 @@ async def chat_stream(request: ChatRequest):
     sys_msg = get_system_message(request.language, rag_context, web_context)
     citations = [{"title": h["title"], "score": round(h["score"], 2)} for h in hits]
     
-    title = request.message[:40] + ("..." if len(request.message) > 40 else "")
-    db.save_chat_thread(request.thread_id, request.user_id, title)
-    db.save_chat_message(request.thread_id, "user", request.message)
+    if not request.is_private:
+        title = request.message[:40] + ("..." if len(request.message) > 40 else "")
+        db.save_chat_thread(request.thread_id, request.user_id, title)
+        db.save_chat_message(request.thread_id, "user", request.message)
 
     lang_desc = LANGUAGE_PROMPTS.get(request.language, request.language)
     model_input = request.message
@@ -282,11 +296,12 @@ async def chat_stream(request: ChatRequest):
                 payload = json.dumps({"webSources": web_sources})
                 yield f"data: {payload}\n\n"
 
-            db.save_chat_message(
-                request.thread_id, "assistant", full_text,
-                citations=citations if citations else None,
-                web_sources=web_sources if web_sources else None
-            )
+            if not request.is_private:
+                db.save_chat_message(
+                    request.thread_id, "assistant", full_text,
+                    citations=citations if citations else None,
+                    web_sources=web_sources if web_sources else None
+                )
         except Exception as e:
             payload = json.dumps({"error": str(e)})
             yield f"data: {payload}\n\n"

@@ -77,7 +77,8 @@ export class ChatService {
     onCitations?: (citations: Array<{ title: string; score: number }>) => void,
     useWebSearch: boolean = false,
     onWebSources?: (sources: Array<{ title: string; href: string }>) => void,
-    model?: string
+    model?: string,
+    isPrivate: boolean = false
   ): Promise<void> {
     try {
       const response = await fetch(`${this.baseUrl}/api/chat/stream`, {
@@ -92,7 +93,8 @@ export class ChatService {
           model,
           use_rag: useRag,
           use_web_search: useWebSearch,
-          user_id: userId
+          user_id: userId,
+          is_private: isPrivate
         })
       });
 

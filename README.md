@@ -1,7 +1,7 @@
 # 🧠 Lumi AI — Intelligence System & Second Brain
 
 [![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
-[![Angular](https://img.shields.io/badge/Frontend-Angular%2017%2F18-DD0031?style=for-the-badge&logo=angular&logoColor=white)](https://angular.dev/)
+[![Angular](https://img.shields.io/badge/Frontend-Angular%2019-DD0031?style=for-the-badge&logo=angular&logoColor=white)](https://angular.dev/)
 [![LangGraph](https://img.shields.io/badge/Agent-LangGraph-FF6F00?style=for-the-badge)](https://langchain-ai.github.io/langgraph/)
 [![PostgreSQL](https://img.shields.io/badge/Database-Neon%20PostgreSQL%20%2B%20PGVector-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://neon.tech/)
 [![OpenRouter](https://img.shields.io/badge/AI%20Gateway-OpenRouter%20Free%20Tier-7C3AED?style=for-the-badge)](https://openrouter.ai/)
@@ -10,7 +10,19 @@
 
 ---
 
-**Lumi AI** is an AI-powered Second Brain and Knowledge Assistant. It combines **LangGraph conversational workflows**, **PostgreSQL PGVector semantic search (RAG)**, **Tavily AI live web search**, **multilingual voice recognition & synthesis**, **real-time chat document attachments**, **dynamic free LLM model switching**, and a **glassmorphism Angular UI**.
+**Lumi AI** is an advanced AI-powered Second Brain and Knowledge Assistant. It combines **LangGraph conversational agent workflows**, **PostgreSQL PGVector semantic search (RAG)**, **Tavily AI live web search**, **zero-database Private (Incognito) Mode**, **multilingual voice recognition & synthesis**, **real-time chat document attachments**, **dynamic free LLM model switching**, and a **glassmorphism Angular UI**.
+
+---
+
+## ✨ Key Highlights & Features
+
+- 🕵️ **Private (Incognito) Mode**: Zero-database chat sessions. When activated, user prompts and AI replies are completely ephemeral and are **never** stored in `chat_threads` or `chat_messages` tables. Includes a stealth UI theme and localized status banners across 15 languages.
+- 🧠 **Personal Knowledge Vault (RAG)**: Ingest PDFs, Markdown, text documents, or live web URLs into Neon PostgreSQL with 384-dimensional `pgvector` embeddings and cosine similarity search.
+- 🌐 **Live Web Search**: Real-time web search powered by Tavily AI with interactive citations and domain source badges.
+- 🎙️ **Real-Time Voice Assistant & Control (`Alt + V`)**: Full-duplex conversational voice mode with audio-reactive 3D orb visualizer, hands-free loop, and natural voice command navigation.
+- 🌍 **15+ Language Localization**: Seamless multi-language support (English, Hindi, Bengali, Tamil, Telugu, Marathi, Gujarati, Kannada, Malayalam, Punjabi, Urdu, Spanish, French, German).
+- ⚡ **Dynamic Free LLM Switching**: One-click dropdown to select between OpenRouter Free, Llama 3.3 70B, Gemini 2.0 Flash, Mistral 7B, GLM 5.2, and more.
+- 🎨 **Premium Glassmorphism UI**: Dynamic Dark/Light themes, Markdown rendering with tables, syntax-highlighted code blocks, and copy-to-clipboard buttons.
 
 ---
 
@@ -19,13 +31,13 @@
 ### 🎨 Frontend
 | Layer / Tool | Technology | Description |
 | :--- | :--- | :--- |
-| **Framework** | [Angular 17 / 18 / 19](https://angular.dev/) | Standalone components, reactive forms, RxJS streams, and HttpClient |
+| **Framework** | [Angular 19](https://angular.dev/) | Standalone components, reactive forms, RxJS streams, and HttpClient |
 | **Styling** | Vanilla CSS3 + Design System | Custom CSS variables, responsive grid/flexbox, and glassmorphism |
 | **Theming** | Light & Dark Mode Engine | Real-time CSS variable switching with persistent `localStorage` |
 | **Icons** | [Remix Icon 4.2](https://remixicon.com/) | SVG icon system for UI elements |
 | **Typography** | [Google Fonts](https://fonts.google.com/) | `Outfit` (headings), `Inter` (body), and `Fira Code` (code blocks) |
-| **Markdown Engine** | Custom Parser | Renders headings, bold/italics, lists, links, inline code, and code blocks |
-| **Audio Capture** | HTML5 MediaRecorder API | Records browser voice audio directly into WAV/WebM blobs |
+| **Markdown Engine** | Custom Parser | Renders tables, blockquotes, lists, links, inline code, and IDE code blocks |
+| **Voice & Audio** | Web Audio API + Speech API | Real-time audio waveform visualizer, SpeechRecognition STT & SpeechSynthesis TTS |
 | **Auth Client** | Google Identity Services (GSI) | Google One-Tap & standard OAuth/credential integration |
 
 ---
@@ -84,6 +96,7 @@
 | `psycopg2-binary` | PostgreSQL connection pool driver |
 | `passlib[bcrypt]` | Salted bcrypt password hashing for user security |
 | `Neon Cloud DB` | Scalable serverless PostgreSQL storage for users, threads, and embeddings |
+| `Private Mode` | Bypasses database operations entirely for confidential / incognito sessions |
 
 ---
 
@@ -109,9 +122,10 @@ Lumi AI allows you to switch LLM models directly from the UI header dropdown or 
 graph TD
     User([User Client Browser])
     
-    subgraph Frontend["Angular 18/19 Glassmorphism Client"]
+    subgraph Frontend["Angular 19 Glassmorphism Client"]
         AuthComp[Auth Component / Login & Register]
-        ChatComp[Chat Box & Voice Controls]
+        ChatComp[Chat Box & Private Mode Toggle]
+        VoiceComp[Voice Assistant Modal & Audio HUD]
         ModelSelector[Dynamic Model Switcher]
         VaultComp[Knowledge Vault Modal]
         ChatService[Chat, Vault & Auth Services]
@@ -137,13 +151,15 @@ graph TD
     
     User --> AuthComp
     User --> ChatComp
+    User --> VoiceComp
     User --> ModelSelector
     User --> VaultComp
     
     ChatComp --> ChatService
+    VoiceComp --> ChatService
     VaultComp --> ChatService
     
-    ChatService -->|/api/chat/stream, /api/models| API
+    ChatService -->|/api/chat/stream (is_private), /api/models| API
     ChatService -->|/api/vault/*, /api/auth/*| API
     
     API --> DBLayer
@@ -155,7 +171,8 @@ graph TD
     LangGraphAgent --> Tavily
     RAGPipeline --> SentenceTransformers
     
-    DBLayer -->|Users, Threads & Vectors| PG
+    DBLayer -.->|Skipped when is_private == true| PG
+    DBLayer -->|Normal Mode: Users, Threads & Vectors| PG
 ```
 
 ---
@@ -173,24 +190,25 @@ My_second_brain/
 │   ├── voice.py          # Audio transcription (STT) & speech synthesis (TTS)
 │   └── search.py         # Tavily live web search integration
 ├── backend.py            # Backward compatibility module proxy
-├── server.py             # FastAPI REST endpoints, SSE token streaming, Vault & Auth routes
+├── server.py             # FastAPI REST endpoints, SSE token streaming, Vault, Auth & Private Mode
 ├── db.py                 # Neon PostgreSQL schema, user auth, thread storage & PGVector RAG
 ├── requirements.txt      # Python backend packages
 ├── .env                  # Environment keys (DATABASE_URL, OPENROUTER_API_KEY, TAVILY_API_KEY)
 ├── vercel.json           # Serverless deployment configuration
 ├── api/
 │   └── index.py          # Serverless entrypoint
-└── frontend-angular/     # Angular application
+└── frontend-angular/     # Angular 19 application
     ├── src/
     │   ├── app/
     │   │   ├── components/
-    │   │   │   ├── auth/        # Login, Signup & Landing View
-    │   │   │   ├── chat-box/    # Chat stream, Model selector, Voice, Attachment & Markdown
-    │   │   │   ├── sidebar/     # Threads history & Knowledge Vault trigger
-    │   │   │   └── vault/       # Document upload, URL ingestion & Vault manager
-    │   │   └── services/        # Angular services (Auth, Chat, Vault, Theme)
-    │   ├── styles.css           # Global theme variables & glassmorphism utilities
-    │   └── index.html           # Fonts and icon imports
+    │   │   │   ├── auth/         # Login, Signup & Landing View
+    │   │   │   ├── chat-box/     # Chat stream, Private Mode toggle, Model selector, Voice, Attachment & Markdown
+    │   │   │   ├── sidebar/      # Threads history & Knowledge Vault trigger
+    │   │   │   ├── vault/        # Document upload, URL ingestion & Vault manager
+    │   │   │   └── voice-modal/  # Real-time Voice HUD & 3D Audio Visualizer
+    │   │   └── services/         # Angular services (Auth, Chat, Vault, Theme, VoiceControl)
+    │   ├── styles.css            # Global theme variables & glassmorphism utilities
+    │   └── index.html            # Fonts and icon imports
     └── package.json
 ```
 
@@ -209,7 +227,7 @@ My_second_brain/
 
 ### 2. Backend Setup
 
-1. **Clone or navigate to the repository root**:
+1. **Navigate to the repository root**:
    ```bash
    cd My_second_brain
    ```
@@ -288,7 +306,7 @@ My_second_brain/
 | `GET` | `/api/vault/documents` | Retrieve all documents stored in the user's vault |
 | `DELETE`| `/api/vault/documents/{id}` | Remove document and delete its vector embeddings |
 
-### 💬 Conversations & Models (`/api`)
+### 💬 Conversations, Private Mode & Models (`/api`)
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
 | `GET` | `/api/models` | Get all available LLMs and active default model |
@@ -296,8 +314,8 @@ My_second_brain/
 | `GET` | `/api/threads` | Get conversation thread list for active user |
 | `GET` | `/api/threads/{id}` | Get message history for a specific thread |
 | `DELETE`| `/api/threads/{id}` | Delete a conversation thread |
-| `POST` | `/api/chat` | Synchronous AI chat request |
-| `POST` | `/api/chat/stream` | Real-time Server-Sent Events (SSE) AI streaming token response |
+| `POST` | `/api/chat` | Synchronous AI chat request (`is_private: true` skips database writes) |
+| `POST` | `/api/chat/stream` | Real-time Server-Sent Events (SSE) AI streaming token response (`is_private: true` supported) |
 
 ### 🎙️ Audio & Voice (`/api`)
 | Method | Endpoint | Description |

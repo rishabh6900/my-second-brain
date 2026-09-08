@@ -59,6 +59,8 @@ import { VoiceControlService, VoiceCommand } from './services/voice-control.serv
         [activeTitle]="activeTitle"
         [threadId]="activeThreadId"
         [isStreaming]="isStreaming"
+        [isPrivateMode]="isPrivateMode"
+        (togglePrivate)="onTogglePrivateMode($event)"
         (onSend)="handleUserSendMessage($event)"
         (toggleSidebar)="onToggleSidebar()"
         (openVaultModal)="isVaultOpen = true"
@@ -154,6 +156,7 @@ export class AppComponent implements OnInit, OnDestroy {
   isMobile: boolean = false;
   isVaultOpen: boolean = false;
   isVoiceModalOpen: boolean = false;
+  isPrivateMode: boolean = false;
 
   activeLanguage: string = 'English';
   selectedModel: string = 'openrouter/free';
@@ -352,6 +355,7 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   onSelectThread(threadId: string) {
+    this.isPrivateMode = false;
     this.activeThreadId = threadId;
     this.closeSidebarOnMobile();
     this.chatService.getThread(threadId).subscribe({
@@ -364,11 +368,23 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   onNewThread() {
+    this.isPrivateMode = false;
     const userId = this.authService.currentUser?.id || 'guest';
     this.activeThreadId = `${userId}__${this.generateUuid()}`;
     this.messages = [];
     this.activeTitle = 'New Conversation';
     this.closeSidebarOnMobile();
+  }
+
+  onTogglePrivateMode(enable: boolean) {
+    this.isPrivateMode = enable;
+    if (this.isPrivateMode) {
+      this.activeThreadId = `private__${this.generateUuid()}`;
+      this.messages = [];
+      this.activeTitle = 'Private Conversation';
+    } else {
+      this.onNewThread();
+    }
   }
 
   onDeleteThread(threadId: string) {
@@ -397,14 +413,14 @@ export class AppComponent implements OnInit, OnDestroy {
     const lang = this.voiceControlService.getLanguage() || this.activeLanguage;
 
     if (!this.activeThreadId) {
-      this.activeThreadId = `${userId}__${this.generateUuid()}`;
+      this.activeThreadId = this.isPrivateMode ? `private__${this.generateUuid()}` : `${userId}__${this.generateUuid()}`;
     }
 
     const userMsg: ChatMessage = { role: 'user', content: query };
     this.messages.push(userMsg);
 
     if (this.messages.length === 1) {
-      this.activeTitle = query.length > 40 ? query.substring(0, 40) + '...' : query;
+      this.activeTitle = this.isPrivateMode ? 'Private Conversation' : (query.length > 40 ? query.substring(0, 40) + '...' : query);
     }
 
     const aiMsg: ChatMessage = { role: 'assistant', content: '' };
@@ -437,7 +453,9 @@ export class AppComponent implements OnInit, OnDestroy {
       },
       () => {
         this.isStreaming = false;
-        this.loadThreads();
+        if (!this.isPrivateMode) {
+          this.loadThreads();
+        }
         if (this.voiceModal) {
           this.voiceModal.updateAiResponse(accumulatedAiResponse, true);
         }
@@ -453,18 +471,20 @@ export class AppComponent implements OnInit, OnDestroy {
       (webSources) => {
         aiMsg.webSources = webSources;
       },
-      this.selectedModel
+      this.selectedModel,
+      this.isPrivateMode
     );
   }
 
   // --- Regular Text Input Chat Handler ---
-  handleUserSendMessage(payload: { text: string; language: string; useRag?: boolean; useWebSearch?: boolean; attachedFile?: File; model?: string } | string) {
+  handleUserSendMessage(payload: { text: string; language: string; useRag?: boolean; useWebSearch?: boolean; attachedFile?: File; model?: string; isPrivate?: boolean } | string) {
     const text = typeof payload === 'string' ? payload : payload.text;
     const language = typeof payload === 'string' ? this.activeLanguage : payload.language;
     const model = typeof payload === 'object' ? payload.model : this.selectedModel;
     const useRag = typeof payload === 'string' ? this.useRag : (payload.useRag ?? this.useRag);
     const useWebSearch = typeof payload === 'object' ? (payload.useWebSearch ?? this.useWebSearch) : this.useWebSearch;
     const attachedFile = typeof payload === 'object' ? payload.attachedFile : undefined;
+    const isPrivate = typeof payload === 'object' ? (payload.isPrivate ?? this.isPrivateMode) : this.isPrivateMode;
     const userId = this.authService.currentUser?.id || 'guest';
 
     if (!text.trim() || this.isStreaming) return;
@@ -474,7 +494,7 @@ export class AppComponent implements OnInit, OnDestroy {
       this.messages.push(userMsg);
 
       if (this.messages.length === 1) {
-        this.activeTitle = text.length > 40 ? text.substring(0, 40) + '...' : text;
+        this.activeTitle = isPrivate ? 'Private Conversation' : (text.length > 40 ? text.substring(0, 40) + '...' : text);
       }
 
       const aiMsg: ChatMessage = { role: 'assistant', content: '' };
@@ -496,7 +516,9 @@ export class AppComponent implements OnInit, OnDestroy {
         },
         () => {
           this.isStreaming = false;
-          this.loadThreads();
+          if (!isPrivate) {
+            this.loadThreads();
+          }
         },
         useRag,
         userId,
@@ -507,7 +529,8 @@ export class AppComponent implements OnInit, OnDestroy {
         (webSources) => {
           aiMsg.webSources = webSources;
         },
-        model
+        model,
+        isPrivate
       );
     };
 
