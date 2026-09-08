@@ -120,33 +120,33 @@ Lumi AI allows you to switch LLM models directly from the UI header dropdown or 
 
 ```mermaid
 graph TD
-    User([User Client Browser])
+    User(["User Client Browser"])
     
     subgraph Frontend["Angular 19 Glassmorphism Client"]
-        AuthComp[Auth Component / Login & Register]
-        ChatComp[Chat Box & Private Mode Toggle]
-        VoiceComp[Voice Assistant Modal & Audio HUD]
-        ModelSelector[Dynamic Model Switcher]
-        VaultComp[Knowledge Vault Modal]
-        ChatService[Chat, Vault & Auth Services]
+        AuthComp["Auth Component / Login & Register"]
+        ChatComp["Chat Box & Private Mode Toggle"]
+        VoiceComp["Voice Assistant Modal & Audio HUD"]
+        ModelSelector["Dynamic Model Switcher"]
+        VaultComp["Knowledge Vault Modal"]
+        ChatService["Chat, Vault & Auth Services"]
     end
     
     subgraph Backend["FastAPI Server Engine (server.py)"]
-        API[FastAPI REST & SSE Router]
-        RAGPipeline[RAG Embeddings & Chunking Engine]
-        LangGraphAgent[LangGraph Agent Graph]
-        VoiceEngine[STT SpeechRecognition & gTTS Engine]
-        DBLayer[Database Manager - db.py]
+        API["FastAPI REST & SSE Router"]
+        RAGPipeline["RAG Embeddings & Chunking Engine"]
+        LangGraphAgent["LangGraph Agent Graph"]
+        VoiceEngine["STT SpeechRecognition & gTTS Engine"]
+        DBLayer["Database Manager - db.py"]
     end
 
     subgraph External_AI["AI & Search Providers"]
-        OpenRouter[OpenRouter Free Tier Gateway]
-        Tavily[Tavily AI Live Web Search]
-        SentenceTransformers[Sentence-Transformers Embeddings]
+        OpenRouter["OpenRouter Free Tier Gateway"]
+        Tavily["Tavily AI Live Web Search"]
+        SentenceTransformers["Sentence-Transformers Embeddings"]
     end
     
     subgraph Storage["Neon Cloud Storage"]
-        PG[(Neon PostgreSQL + PGVector)]
+        PG[("Neon PostgreSQL + PGVector")]
     end
     
     User --> AuthComp
@@ -159,8 +159,8 @@ graph TD
     VoiceComp --> ChatService
     VaultComp --> ChatService
     
-    ChatService -->|/api/chat/stream (is_private), /api/models| API
-    ChatService -->|/api/vault/*, /api/auth/*| API
+    ChatService -->|"/api/chat/stream (is_private), /api/models"| API
+    ChatService -->|"/api/vault/*, /api/auth/*"| API
     
     API --> DBLayer
     API --> RAGPipeline
@@ -171,8 +171,8 @@ graph TD
     LangGraphAgent --> Tavily
     RAGPipeline --> SentenceTransformers
     
-    DBLayer -.->|Skipped when is_private == true| PG
-    DBLayer -->|Normal Mode: Users, Threads & Vectors| PG
+    DBLayer -.->|"Skipped when is_private == true"| PG
+    DBLayer -->|"Normal Mode: Users, Threads & Vectors"| PG
 ```
 
 ---
