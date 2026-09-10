@@ -1,4 +1,4 @@
-# 🧠 Lumi AI — Intelligence System & Second Brain
+# Lumi AI — Intelligence System & Second Brain
 
 [![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![Angular](https://img.shields.io/badge/Frontend-Angular%2019-DD0031?style=for-the-badge&logo=angular&logoColor=white)](https://angular.dev/)
@@ -14,21 +14,21 @@
 
 ---
 
-## ✨ Key Highlights & Features
+## Key Highlights & Features
 
-- 🕵️ **Private (Incognito) Mode**: Zero-database chat sessions. When activated, user prompts and AI replies are completely ephemeral and are **never** stored in `chat_threads` or `chat_messages` tables. Includes a stealth UI theme and localized status banners across 15 languages.
-- 🧠 **Personal Knowledge Vault (RAG)**: Ingest PDFs, Markdown, text documents, or live web URLs into Neon PostgreSQL with 384-dimensional `pgvector` embeddings and cosine similarity search.
-- 🌐 **Live Web Search**: Real-time web search powered by Tavily AI with interactive citations and domain source badges.
-- 🎙️ **Real-Time Voice Assistant & Control (`Alt + V`)**: Full-duplex conversational voice mode with audio-reactive 3D orb visualizer, hands-free loop, and natural voice command navigation.
-- 🌍 **15+ Language Localization**: Seamless multi-language support (English, Hindi, Bengali, Tamil, Telugu, Marathi, Gujarati, Kannada, Malayalam, Punjabi, Urdu, Spanish, French, German).
-- ⚡ **Dynamic Free LLM Switching**: One-click dropdown to select between OpenRouter Free, Llama 3.3 70B, Gemini 2.0 Flash, Mistral 7B, GLM 5.2, and more.
-- 🎨 **Premium Glassmorphism UI**: Dynamic Dark/Light themes, Markdown rendering with tables, syntax-highlighted code blocks, and copy-to-clipboard buttons.
+- **Private (Incognito) Mode**: Zero-database chat sessions. When activated, user prompts and AI replies are completely ephemeral and are **never** stored in `chat_threads` or `chat_messages` tables. Includes a stealth UI theme and localized status banners across 15 languages.
+- **Personal Knowledge Vault (RAG)**: Ingest PDFs, Markdown, text documents, or live web URLs into Neon PostgreSQL with 384-dimensional `pgvector` embeddings and cosine similarity search.
+- **Live Web Search**: Real-time web search powered by Tavily AI with interactive citations and domain source badges.
+- **Real-Time Voice Assistant & Control (`Alt + V`)**: Full-duplex conversational voice mode with audio-reactive 3D orb visualizer, hands-free loop, and natural voice command navigation.
+- **15+ Language Localization**: Seamless multi-language support (English, Hindi, Bengali, Tamil, Telugu, Marathi, Gujarati, Kannada, Malayalam, Punjabi, Urdu, Spanish, French, German).
+- **Dynamic Free LLM Switching**: One-click dropdown to select between OpenRouter Free, Llama 3.3 70B, Gemini 2.0 Flash, Mistral 7B, GLM 5.2, and more.
+- **Premium Glassmorphism UI**: Dynamic Dark/Light themes, Markdown rendering with tables, syntax-highlighted code blocks, and copy-to-clipboard buttons.
 
 ---
 
-## 🛠️ Complete Tech Stack
+## Complete Tech Stack
 
-### 🎨 Frontend
+### Frontend
 | Layer / Tool | Technology | Description |
 | :--- | :--- | :--- |
 | **Framework** | [Angular 19](https://angular.dev/) | Standalone components, reactive forms, RxJS streams, and HttpClient |
@@ -42,7 +42,7 @@
 
 ---
 
-### ⚙️ Backend & API
+### Backend & API
 | Layer / Tool | Technology | Description |
 | :--- | :--- | :--- |
 | **Framework** | [FastAPI](https://fastapi.tiangolo.com/) | High-performance Python web framework with asynchronous routes |
@@ -54,7 +54,7 @@
 
 ---
 
-### 🤖 AI, LLMs & Agent Orchestration
+### AI, LLMs & Agent Orchestration
 | Component | Tool / Library | Description |
 | :--- | :--- | :--- |
 | **Agent Engine** | [LangGraph](https://langchain-ai.github.io/langgraph/) | Graph workflow (`StateGraph`, `START`, `END`, and `MemorySaver`) |
@@ -66,7 +66,7 @@
 
 ---
 
-### 📚 RAG, Vector Search & Document Ingestion
+### RAG, Vector Search & Document Ingestion
 | Component | Tool / Library | Description |
 | :--- | :--- | :--- |
 | **Vector Database** | [Neon PostgreSQL](https://neon.tech/) + [pgvector](https://github.com/pgvector/pgvector) | Cloud PostgreSQL database with cosine similarity vector indexes |
@@ -77,7 +77,7 @@
 
 ---
 
-### 🎙️ Speech, Real-Time Voice Chat & Voice Control Engine
+### Speech, Real-Time Voice Chat & Voice Control Engine
 | Component | Tool / Library | Description |
 | :--- | :--- | :--- |
 | **Real-Time Voice Assistant** | Web Audio API + Speech API | Full-duplex hands-free live conversation loop with barge-in interruption |
@@ -90,7 +90,7 @@
 
 ---
 
-### 🔐 Security & Database
+### Security & Database
 | Tool | Purpose |
 | :--- | :--- |
 | `psycopg2-binary` | PostgreSQL connection pool driver |
@@ -100,23 +100,23 @@
 
 ---
 
-## 🌟 Supported Free LLM Models
+## Supported Free LLM Models
 
 Lumi AI allows you to switch LLM models directly from the UI header dropdown or via `.env`:
 
 | Model Name | Provider | Model ID | Strengths |
 | :--- | :--- | :--- | :--- |
-| **OpenRouter Free** | OpenRouter | `openrouter/free` | ✨ Auto-routes to the best available free model |
-| **Z.ai GLM 5.2** | Z.ai | `z-ai/glm-5.2:free` | 🧠 14.9B Reasoning, long-context (256k) & coding |
-| **Llama 3.3 70B** | Meta | `meta-llama/llama-3.3-70b-instruct:free` | 🔥 Powerful, state-of-the-art general reasoning |
-| **Gemini 2.0 Flash** | Google | `google/gemini-2.0-flash-exp:free` | ⚡ Ultra-fast token generation & long context |
-| **Llama 3.1 8B** | Meta | `meta-llama/llama-3.1-8b-instruct:free` | 🚀 Lightweight, quick everyday responses |
-| **Mistral 7B** | Mistral AI | `mistralai/mistral-7b-instruct:free` | 🌪️ Compact and concise multilingual model |
-| **Llama 3.2 3B** | Meta | `meta-llama/llama-3.2-3b-instruct:free` | ⚡ Fast lightweight assistant |
+| **OpenRouter Free** | OpenRouter | `openrouter/free` | Auto-routes to the best available free model |
+| **Z.ai GLM 5.2** | Z.ai | `z-ai/glm-5.2:free` | 14.9B Reasoning, long-context (256k) & coding |
+| **Llama 3.3 70B** | Meta | `meta-llama/llama-3.3-70b-instruct:free` | Powerful, state-of-the-art general reasoning |
+| **Gemini 2.0 Flash** | Google | `google/gemini-2.0-flash-exp:free` | Ultra-fast token generation & long context |
+| **Llama 3.1 8B** | Meta | `meta-llama/llama-3.1-8b-instruct:free` | Lightweight, quick everyday responses |
+| **Mistral 7B** | Mistral AI | `mistralai/mistral-7b-instruct:free` | Compact and concise multilingual model |
+| **Llama 3.2 3B** | Meta | `meta-llama/llama-3.2-3b-instruct:free` | Fast lightweight assistant |
 
 ---
 
-## 🏗️ Architecture Diagram
+## Architecture Diagram
 
 ```mermaid
 graph TD
@@ -177,7 +177,7 @@ graph TD
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 ```text
 My_second_brain/
@@ -214,7 +214,7 @@ My_second_brain/
 
 ---
 
-## ⚡ Setup & Installation
+## Setup & Installation
 
 ### 1. Prerequisites
 - **Python 3.10+**
@@ -289,16 +289,16 @@ My_second_brain/
 
 ---
 
-## 🌐 API Reference
+## API Reference
 
-### 🔐 Authentication (`/api/auth`)
+### Authentication (`/api/auth`)
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
 | `POST` | `/api/auth/register` | Register a new user with name, email, and password |
 | `POST` | `/api/auth/login` | Authenticate user and verify bcrypt password |
 | `POST` | `/api/auth/reset-password` | Update existing user password |
 
-### 📚 Knowledge Vault & RAG (`/api/vault`)
+### Knowledge Vault & RAG (`/api/vault`)
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
 | `POST` | `/api/vault/upload` | Ingest PDF, TXT, or MD documents into PGVector |
@@ -306,7 +306,7 @@ My_second_brain/
 | `GET` | `/api/vault/documents` | Retrieve all documents stored in the user's vault |
 | `DELETE`| `/api/vault/documents/{id}` | Remove document and delete its vector embeddings |
 
-### 💬 Conversations, Private Mode & Models (`/api`)
+### Conversations, Private Mode & Models (`/api`)
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
 | `GET` | `/api/models` | Get all available LLMs and active default model |
@@ -317,7 +317,7 @@ My_second_brain/
 | `POST` | `/api/chat` | Synchronous AI chat request (`is_private: true` skips database writes) |
 | `POST` | `/api/chat/stream` | Real-time Server-Sent Events (SSE) AI streaming token response (`is_private: true` supported) |
 
-### 🎙️ Audio & Voice (`/api`)
+### Audio & Voice (`/api`)
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
 | `POST` | `/api/transcribe` | Convert uploaded voice audio to text via Google STT |
@@ -325,5 +325,5 @@ My_second_brain/
 
 ---
 
-## 📄 License
+## License
 This project is open-source and available under the [MIT License](LICENSE).

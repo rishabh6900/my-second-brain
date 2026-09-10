@@ -1,4 +1,4 @@
-# 🎨 Lumi AI — Angular Frontend Client
+# Lumi AI — Angular Frontend Client
 
 [![Angular](https://img.shields.io/badge/Angular-19.1.0-DD0031?style=flat-square&logo=angular)](https://angular.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-3178C6?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
@@ -8,7 +8,7 @@ This repository contains the standalone **Angular 19** frontend application for 
 
 ---
 
-## 🚀 Development Setup
+## Development Setup
 
 ### 1. Installation
 
@@ -37,7 +37,7 @@ npm run build
 
 ---
 
-## 🧩 Architectural Overview
+## Architectural Overview
 
 The Angular application is organized using **Standalone Components** and modular services:
 
@@ -95,7 +95,7 @@ The Angular application is organized using **Standalone Components** and modular
 
 ---
 
-## 🎨 Design Tokens & Theming
+## Design Tokens & Theming
 
 The application uses Vanilla CSS custom properties defined in `src/styles.css` for instant theme toggling without full page reloads:
 
@@ -103,4 +103,5 @@ The application uses Vanilla CSS custom properties defined in `src/styles.css` f
 - `--glass-border`, `--glass-shine`, `--accent-glow`
 - `--text-primary`, `--text-secondary`, `--text-muted`
 - `--accent-gradient`, `--accent-primary`, `--accent-secondary`
+
 
