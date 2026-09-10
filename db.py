@@ -53,7 +53,8 @@ def get_pg_connection():
         return None
 
 def get_sqlite_connection():
-    return sqlite3.connect("chatbot.db", check_same_thread=False)
+    db_path = "/tmp/chatbot.db" if os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME") else "chatbot.db"
+    return sqlite3.connect(db_path, check_same_thread=False)
 
 def init_db():
     load_dotenv(override=True)
