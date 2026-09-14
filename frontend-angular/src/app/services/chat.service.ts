@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, Subject, of } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface ThreadSummary {
   id: string;
@@ -41,7 +42,7 @@ export interface AvailableModelsResponse {
   providedIn: 'root'
 })
 export class ChatService {
-  private baseUrl = 'http://localhost:8000';
+  private baseUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 

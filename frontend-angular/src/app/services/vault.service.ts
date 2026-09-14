@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface VaultDocument {
   id: string;
@@ -15,7 +16,7 @@ export interface VaultDocument {
   providedIn: 'root'
 })
 export class VaultService {
-  private apiUrl = 'http://localhost:8000/api/vault';
+  private apiUrl = `${environment.apiUrl}/api/vault`;
 
   constructor(private http: HttpClient) {}
 

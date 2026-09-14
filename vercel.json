@@ -1,4 +1,7 @@
 {
+  "version": 2,
+  "buildCommand": "cd frontend-angular && npm install && npm run build",
+  "outputDirectory": "frontend-angular/dist/lumi-ai/browser",
   "rewrites": [
     {
       "source": "/api/(.*)",
@@ -11,6 +14,10 @@
     {
       "source": "/openapi.json",
       "destination": "/api/index.py"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
