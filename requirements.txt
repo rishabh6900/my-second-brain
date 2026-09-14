@@ -20,3 +20,4 @@ pypdf
 beautifulsoup4
 langchain-text-splitters
 tavily-python
+typing_extensions
