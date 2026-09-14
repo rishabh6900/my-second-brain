@@ -1,0 +1,8 @@
+{
+  "name": "my-second-brain",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "cd frontend-angular && npm install && npm run build"
+  }
+}
