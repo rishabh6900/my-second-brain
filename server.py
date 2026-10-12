@@ -393,3 +393,56 @@ def tts(request: TTSRequest):
         raise HTTPException(status_code=500, detail="Failed to convert text to speech")
     return Response(content=audio_bytes, media_type="audio/mpeg")
 
+
+# --- Health Check Endpoint (Render & Monitoring) ---
+@app.get("/healthz")
+@app.get("/api/health")
+def health_check():
+    return {"status": "ok", "timestamp": datetime.utcnow().isoformat() + "Z"}
+
+
+# --- Static Files & Angular SPA Frontend Serving ---
+import os
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+
+# Candidate locations for the compiled Angular frontend
+FRONTEND_CANDIDATE_PATHS = [
+    os.getenv("STATIC_DIR"),
+    os.path.join(os.path.dirname(__file__), "static"),
+    os.path.join(os.path.dirname(__file__), "frontend-angular", "dist", "lumi-ai", "browser"),
+    os.path.join(os.path.dirname(__file__), "frontend-angular", "dist", "lumi-ai"),
+]
+
+STATIC_DIR = next((p for p in FRONTEND_CANDIDATE_PATHS if p and os.path.exists(p)), None)
+
+if STATIC_DIR:
+    # Mount assets folder if present
+    assets_dir = os.path.join(STATIC_DIR, "assets")
+    if os.path.exists(assets_dir):
+        app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
+
+    # SPA catch-all: serve specific static files if found, otherwise index.html
+    @app.get("/{full_path:path}")
+    async def serve_spa(full_path: str):
+        # Do not catch unhandled API routes with index.html
+        if full_path.startswith("api/"):
+            raise HTTPException(status_code=404, detail="API endpoint not found")
+
+        file_path = os.path.join(STATIC_DIR, full_path)
+        if full_path and os.path.isfile(file_path):
+            return FileResponse(file_path)
+
+        index_file = os.path.join(STATIC_DIR, "index.html")
+        if os.path.isfile(index_file):
+            return FileResponse(index_file)
+
+        raise HTTPException(status_code=404, detail="Frontend index.html not found")
+
+
+if __name__ == "__main__":
+    import uvicorn
+    port = int(os.getenv("PORT", 8000))
+    uvicorn.run("server:app", host="0.0.0.0", port=port, reload=False)
+
+

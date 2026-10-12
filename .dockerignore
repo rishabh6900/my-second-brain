@@ -1,14 +1,32 @@
-__pycache__
-*.pyc
-*.pyo
-*.pyd
-.Python
-env/
-venv/
-.venv/
-.env
+# Git
 .git
 .gitignore
-chatbot.db
-frontend-angular/
-node_modules/
+
+# Environment secrets
+.env
+*.env
+
+# Local databases
+*.db
+*.sqlite3
+chatbot.db*
+
+# Node / Angular build artifacts and dependencies
+**/node_modules
+**/.angular
+**/dist
+
+# Python bytecode and virtual environments
+__pycache__
+*/__pycache__
+*.py[cod]
+*$py.class
+.venv
+venv
+ENV/
+
+# Documentation and temporary files
+*.md
+.agents/
+.DS_Store
+Thumbs.db
