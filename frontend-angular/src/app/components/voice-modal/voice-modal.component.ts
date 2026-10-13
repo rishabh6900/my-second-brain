@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, Output, EventEmitter, Input, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, Output, EventEmitter, Input, ChangeDetectorRef, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { VoiceControlService, VoiceState, VoiceMode, VoiceTranscript, VoiceCommand } from '../../services/voice-control.service';
@@ -23,27 +23,17 @@ import { Subscription } from 'rxjs';
           </div>
 
           <div class="header-actions">
-            <!-- Language Selector -->
-            <div class="lang-selector-wrapper">
-              <i class="ri-global-line"></i>
-              <select [(ngModel)]="selectedLanguage" (change)="onLanguageChange()" class="voice-lang-select" title="Change voice language">
-                <option value="English">🇬🇧 English</option>
-                <option value="English (India)">🇮🇳 English (India)</option>
-                <option value="Hindi">🇮🇳 Hindi (हिंदी)</option>
-                <option value="Bengali">🇮🇳 Bengali (বাংলা)</option>
-                <option value="Tamil">🇮🇳 Tamil (தமிழ்)</option>
-                <option value="Telugu">🇮🇳 Telugu (తెలుగు)</option>
-                <option value="Marathi">🇮🇳 Marathi (मराठी)</option>
-                <option value="Gujarati">🇮🇳 Gujarati (ગુજરાતી)</option>
-                <option value="Kannada">🇮🇳 Kannada (ಕನ್ನಡ)</option>
-                <option value="Malayalam">🇮🇳 Malayalam (മലയാളം)</option>
-                <option value="Punjabi">🇮🇳 Punjabi (ਪੰਜਾਬੀ)</option>
-                <option value="Urdu">🇮🇳 Urdu (اردو)</option>
-                <option value="Spanish">🇪🇸 Spanish (Español)</option>
-                <option value="French">🇫🇷 French (Français)</option>
-                <option value="German">🇩🇪 German (Deutsch)</option>
-              </select>
-            </div>
+            <!-- Custom Language Selector Trigger Pill -->
+            <button 
+              type="button" 
+              class="voice-lang-pill-btn" 
+              (click)="isLangModalOpen = true" 
+              [title]="'Change voice language: ' + selectedLanguage"
+            >
+              <span class="voice-lang-flag">{{ getSelectedLanguageFlag() }}</span>
+              <span class="voice-lang-label">{{ getSelectedLanguageShortName() }}</span>
+              <i class="ri-arrow-down-s-line voice-lang-chevron"></i>
+            </button>
 
             <!-- Help / Commands Button -->
             <button class="icon-tool-btn" (click)="showCommands = !showCommands" [class.active]="showCommands" title="Voice Commands Cheat Sheet">
@@ -110,7 +100,7 @@ import { Subscription } from 'rxjs';
           <div class="status-label-badge" [ngClass]="state">
             <span *ngIf="state === 'listening'" class="status-text">
               <span class="pulse-indicator red"></span> 
-              {{ mode === 'push-to-talk' ? 'Listening... Speak and click "Send Query" when done' : 'Listening in ' + selectedLanguage + '... Speak naturally' }}
+              {{ getListeningStatusText() }}
             </span>
             <span *ngIf="state === 'processing'" class="status-text">
               <span class="pulse-indicator purple"></span> Lumi is generating response...
@@ -267,6 +257,51 @@ import { Subscription } from 'rxjs';
           </div>
         </div>
 
+        <!-- Custom Voice Language Bottom Sheet Modal -->
+        <div 
+          class="voice-lang-overlay" 
+          *ngIf="isLangModalOpen" 
+          (click)="isLangModalOpen = false"
+        >
+          <div class="voice-lang-sheet" (click)="$event.stopPropagation()">
+            <div class="sheet-handle-bar">
+              <span class="sheet-handle"></span>
+            </div>
+
+            <div class="voice-sheet-header">
+              <div class="voice-sheet-title-row">
+                <div class="voice-sheet-icon">
+                  <i class="ri-global-line"></i>
+                </div>
+                <div>
+                  <h4>Voice & Speech Language</h4>
+                  <p>Optimizes speech recognition & AI voice accent</p>
+                </div>
+              </div>
+              <button type="button" class="voice-sheet-close-btn" (click)="isLangModalOpen = false" title="Close">
+                <i class="ri-close-line"></i>
+              </button>
+            </div>
+
+            <div class="voice-sheet-body">
+              <div 
+                *ngFor="let lang of availableLanguages" 
+                class="voice-lang-card"
+                [class.active]="selectedLanguage === lang.code"
+                (click)="selectLanguage(lang.code)"
+              >
+                <span class="voice-lang-card-flag">{{ lang.flag }}</span>
+                <div class="voice-lang-card-info">
+                  <span class="voice-lang-card-name">{{ lang.name }}</span>
+                  <span class="voice-lang-card-native">{{ lang.nativeName }}</span>
+                </div>
+                <i class="ri-checkbox-circle-fill voice-active-check" *ngIf="selectedLanguage === lang.code"></i>
+                <span class="voice-empty-check" *ngIf="selectedLanguage !== lang.code"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   `,
@@ -305,15 +340,18 @@ import { Subscription } from 'rxjs';
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 1.25rem 1.75rem;
+      padding: 1.1rem 1.6rem;
       border-bottom: 1px solid rgba(255, 255, 255, 0.08);
       z-index: 10;
+      gap: 0.6rem;
     }
 
     .brand-badge {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
+      gap: 0.65rem;
+      min-width: 0;
+      flex: 1;
     }
 
     .brand-title {
@@ -322,6 +360,9 @@ import { Subscription } from 'rxjs';
       font-weight: 700;
       color: #fff;
       letter-spacing: -0.02em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .mode-pill {
@@ -332,6 +373,8 @@ import { Subscription } from 'rxjs';
       padding: 2px 10px;
       border-radius: 20px;
       font-weight: 600;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
 
     .mode-pill.auto {
@@ -346,6 +389,7 @@ import { Subscription } from 'rxjs';
       border-radius: 50%;
       background: #64748b;
       transition: all 0.3s ease;
+      flex-shrink: 0;
     }
 
     .live-dot.active {
@@ -356,33 +400,237 @@ import { Subscription } from 'rxjs';
     .header-actions {
       display: flex;
       align-items: center;
-      gap: 0.6rem;
+      gap: 0.55rem;
+      flex-shrink: 0;
     }
 
-    .lang-selector-wrapper {
+    /* Voice Language Selector Pill Button */
+    .voice-lang-pill-btn {
       display: flex;
       align-items: center;
       gap: 0.35rem;
       background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.15);
       border-radius: 20px;
       padding: 0.3rem 0.65rem;
+      color: #f8fafc;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      white-space: nowrap;
+      user-select: none;
+      -webkit-user-select: none;
+      font-family: inherit;
+    }
+
+    .voice-lang-pill-btn:hover {
+      background: rgba(255, 255, 255, 0.14);
+      border-color: rgba(99, 102, 241, 0.4);
+      box-shadow: 0 0 12px rgba(99, 102, 241, 0.25);
+    }
+
+    .voice-lang-flag {
+      font-size: 0.95rem;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .voice-lang-label {
+      max-width: 105px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 0.8rem;
+    }
+
+    .voice-lang-chevron {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      flex-shrink: 0;
+    }
+
+    /* Custom Voice Language Bottom-Sheet Drawer */
+    .voice-lang-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(4, 7, 18, 0.75);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      z-index: 100;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      animation: fadeIn 0.2s ease-out;
+      border-radius: inherit;
+    }
+
+    .voice-lang-sheet {
+      background: rgba(15, 23, 42, 0.98);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-top-left-radius: 24px;
+      border-top-right-radius: 24px;
+      border-bottom: none;
+      box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.6);
+      width: 100%;
+      max-height: 82%;
+      display: flex;
+      flex-direction: column;
+      animation: slideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+      overflow: hidden;
+    }
+
+    .sheet-handle-bar {
+      display: flex;
+      justify-content: center;
+      padding: 10px 0 2px 0;
+    }
+
+    .sheet-handle {
+      width: 38px;
+      height: 4px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    .voice-sheet-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1.25rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .voice-sheet-title-row {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+    }
+
+    .voice-sheet-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: rgba(99, 102, 241, 0.2);
+      border: 1px solid rgba(99, 102, 241, 0.35);
+      color: #a5b4fc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.15rem;
+      flex-shrink: 0;
+    }
+
+    .voice-sheet-title-row h4 {
+      margin: 0;
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.2;
+    }
+
+    .voice-sheet-title-row p {
+      margin: 0.15rem 0 0 0;
+      font-size: 0.72rem;
       color: #94a3b8;
     }
 
-    .voice-lang-select {
-      background: transparent;
-      border: none;
-      color: #f8fafc;
-      font-size: 0.82rem;
-      font-weight: 600;
-      outline: none;
+    .voice-sheet-close-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #cbd5e1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
       cursor: pointer;
+      transition: all 0.2s ease;
     }
 
-    .voice-lang-select option {
-      background: #0f172a;
+    .voice-sheet-close-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
       color: #fff;
+      transform: rotate(90deg);
+    }
+
+    .voice-sheet-body {
+      padding: 0.75rem 1rem 1.25rem 1rem;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .voice-lang-card {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.65rem 0.85rem;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .voice-lang-card:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .voice-lang-card.active {
+      background: rgba(99, 102, 241, 0.2);
+      border-color: rgba(99, 102, 241, 0.5);
+      box-shadow: 0 0 14px rgba(99, 102, 241, 0.2);
+    }
+
+    .voice-lang-card-flag {
+      font-size: 1.4rem;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .voice-lang-card-info {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.1rem;
+    }
+
+    .voice-lang-card-name {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .voice-lang-card-native {
+      font-size: 0.74rem;
+      color: #94a3b8;
+    }
+
+    .voice-active-check {
+      font-size: 1.25rem;
+      color: #818cf8;
+      filter: drop-shadow(0 0 6px rgba(99, 102, 241, 0.6));
+      flex-shrink: 0;
+    }
+
+    .voice-empty-check {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(255, 255, 255, 0.2);
+      flex-shrink: 0;
     }
 
     .icon-tool-btn {
@@ -990,6 +1238,119 @@ import { Subscription } from 'rxjs';
     .animate-scale-in {
       animation: fadeIn 0.2s ease-out;
     }
+
+    @media (max-width: 640px) {
+      .voice-overlay {
+        padding: 0.35rem;
+      }
+      .voice-modal-container {
+        height: 98vh;
+        max-height: 98vh;
+        border-radius: 22px;
+      }
+      .modal-header {
+        padding: 0.75rem 0.85rem;
+        gap: 0.35rem;
+      }
+      .brand-badge {
+        gap: 0.45rem;
+        min-width: 0;
+        flex: 1;
+        overflow: hidden;
+      }
+      .brand-title {
+        font-size: 0.95rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .mode-pill {
+        display: none; /* Hide header duplicate on mobile to eliminate upper text squishing */
+      }
+      .header-actions {
+        gap: 0.3rem;
+        flex-shrink: 0;
+      }
+      .voice-lang-pill-btn {
+        padding: 0.22rem 0.45rem;
+        gap: 0.22rem;
+        font-size: 0.75rem;
+        max-width: 95px;
+      }
+      .voice-lang-label {
+        max-width: 55px;
+        font-size: 0.75rem;
+      }
+      .icon-tool-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 1rem;
+      }
+      .status-label-badge {
+        margin-top: 0.55rem;
+        padding: 0.3rem 0.75rem;
+        max-width: 92%;
+      }
+      .status-text {
+        font-size: 0.76rem;
+        text-align: center;
+        justify-content: center;
+      }
+      .orb-container {
+        min-height: 200px;
+        padding: 0.4rem 0;
+      }
+      .glow-bg {
+        width: 220px;
+        height: 220px;
+      }
+      .ring-1 {
+        width: 140px;
+        height: 140px;
+      }
+      .ring-2 {
+        width: 180px;
+        height: 180px;
+      }
+      .central-orb {
+        width: 100px;
+        height: 100px;
+      }
+      .orb-icon {
+        font-size: 1.8rem;
+      }
+      .audio-wave-bars {
+        margin-top: 0.85rem;
+        height: 30px;
+      }
+      .transcript-display-area {
+        padding: 0.6rem 0.85rem;
+        max-height: 140px;
+      }
+      .transcript-text {
+        font-size: 0.85rem;
+      }
+      .modal-footer {
+        padding: 0.75rem 0.85rem;
+        flex-wrap: wrap;
+        gap: 0.55rem;
+        justify-content: center;
+      }
+      .mode-toggle-group {
+        order: 1;
+        width: 100%;
+        justify-content: center;
+      }
+      .action-buttons-center {
+        order: 2;
+      }
+      .footer-end-btn {
+        order: 3;
+      }
+      .commands-grid {
+        grid-template-columns: 1fr;
+      }
+    }
   `]
 })
 export class VoiceModalComponent implements OnInit, OnDestroy {
@@ -1002,7 +1363,26 @@ export class VoiceModalComponent implements OnInit, OnDestroy {
   mode: VoiceMode = 'auto';
   audioLevel: number = 0;
   selectedLanguage: string = 'English';
+  isLangModalOpen: boolean = false;
   isMuted: boolean = false;
+
+  availableLanguages = [
+    { code: 'English', name: 'English', flag: '🇬🇧', nativeName: 'English (Global)' },
+    { code: 'English (India)', name: 'English (India)', flag: '🇮🇳', nativeName: 'Indian English' },
+    { code: 'Hindi', name: 'Hindi', flag: '🇮🇳', nativeName: 'हिंदी' },
+    { code: 'Bengali', name: 'Bengali', flag: '🇮🇳', nativeName: 'বাংলা' },
+    { code: 'Tamil', name: 'Tamil', flag: '🇮🇳', nativeName: 'தமிழ்' },
+    { code: 'Telugu', name: 'Telugu', flag: '🇮🇳', nativeName: 'తెలుగు' },
+    { code: 'Marathi', name: 'Marathi', flag: '🇮🇳', nativeName: 'मराठी' },
+    { code: 'Gujarati', name: 'Gujarati', flag: '🇮🇳', nativeName: 'ગુજરાતી' },
+    { code: 'Kannada', name: 'Kannada', flag: '🇮🇳', nativeName: 'ಕನ್ನಡ' },
+    { code: 'Malayalam', name: 'Malayalam', flag: '🇮🇳', nativeName: 'മലയാളം' },
+    { code: 'Punjabi', name: 'Punjabi', flag: '🇮🇳', nativeName: 'ਪੰਜਾਬੀ' },
+    { code: 'Urdu', name: 'Urdu', flag: '🇮🇳', nativeName: 'اردو' },
+    { code: 'Spanish', name: 'Spanish', flag: '🇪🇸', nativeName: 'Español' },
+    { code: 'French', name: 'French', flag: '🇫🇷', nativeName: 'Français' },
+    { code: 'German', name: 'German', flag: '🇩🇪', nativeName: 'Deutsch' },
+  ];
   showCommands: boolean = false;
   autoCountdown: number = 0;
 
@@ -1081,6 +1461,41 @@ export class VoiceModalComponent implements OnInit, OnDestroy {
 
   setMode(mode: VoiceMode): void {
     this.voiceService.setMode(mode);
+  }
+
+  selectLanguage(code: string): void {
+    this.selectedLanguage = code;
+    this.onLanguageChange();
+    this.isLangModalOpen = false;
+  }
+
+  getSelectedLanguageFlag(): string {
+    const found = this.availableLanguages.find(l => l.code === this.selectedLanguage);
+    return found ? found.flag : '🌐';
+  }
+
+  getSelectedLanguageShortName(): string {
+    if (this.selectedLanguage === 'English (India)') return 'Eng (IN)';
+    return this.selectedLanguage || 'English';
+  }
+
+  getListeningStatusText(): string {
+    if (this.mode === 'push-to-talk') {
+      return 'Listening... Speak & tap Send Query';
+    }
+    const shortLang = this.getSelectedLanguageShortName();
+    return `Listening in ${shortLang}... Speak naturally`;
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscapeKey(): void {
+    if (this.isLangModalOpen) {
+      this.isLangModalOpen = false;
+    } else if (this.showCommands) {
+      this.showCommands = false;
+    } else {
+      this.close();
+    }
   }
 
   onLanguageChange(): void {

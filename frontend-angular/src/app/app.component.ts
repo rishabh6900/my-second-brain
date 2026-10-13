@@ -88,8 +88,15 @@ import { VoiceControlService, VoiceCommand } from './services/voice-control.serv
   styles: [`
     :host {
       display: block;
-      width: 100vw;
-      height: 100vh;
+      width: 100%;
+      max-width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+    app-auth {
+      display: block;
+      width: 100%;
+      height: 100%;
       overflow: hidden;
     }
     .app-layout {

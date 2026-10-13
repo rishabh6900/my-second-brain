@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, ViewChild, ElementRef, OnInit, AfterViewChecked, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ViewChild, ElementRef, OnInit, AfterViewChecked, OnChanges, SimpleChanges, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
@@ -21,37 +21,29 @@ import { VoiceControlService } from '../../services/voice-control.service';
           <h3>{{ activeTitle || 'New Conversation' }}</h3>
         </div>
 
-        <!-- Dynamic LLM Model Selector -->
-        <div class="model-selector" [title]="'Active Model: ' + getSelectedModelName()">
-          <i class="ri-cpu-line model-icon"></i>
-          <select [(ngModel)]="selectedModel" (change)="onModelChange()" class="model-select" title="Change LLM Model">
-            <option *ngFor="let m of availableModels" [value]="m.id">
-              {{ m.name }}
-            </option>
-          </select>
-        </div>
+        <!-- Dynamic LLM Model Selector Trigger Pill -->
+        <button 
+          type="button" 
+          class="header-pill-btn model-pill-btn" 
+          (click)="openModelModal()" 
+          [title]="'Active Model: ' + getSelectedModelName()"
+        >
+          <i [class]="getModelIcon(selectedModel)" class="model-pill-icon"></i>
+          <span class="pill-text">{{ getSelectedModelShortName() }}</span>
+          <i class="ri-arrow-down-s-line pill-chevron"></i>
+        </button>
 
-        <!-- Multi-Language Selector -->
-        <div class="lang-selector">
-          <i class="ri-global-line lang-icon"></i>
-          <select [(ngModel)]="selectedLanguage" (ngModelChange)="onLanguageChange($event)" class="lang-select" title="Select Chat & Voice Language">
-            <option value="English">🇬🇧 English</option>
-            <option value="English (India)">🇮🇳 English (India)</option>
-            <option value="Hindi">🇮🇳 Hindi (हिंदी)</option>
-            <option value="Bengali">🇮🇳 Bengali (বাংলা)</option>
-            <option value="Tamil">🇮🇳 Tamil (தமிழ்)</option>
-            <option value="Telugu">🇮🇳 Telugu (తెలుగు)</option>
-            <option value="Marathi">🇮🇳 Marathi (मराठी)</option>
-            <option value="Gujarati">🇮🇳 Gujarati (ગુજરાતી)</option>
-            <option value="Kannada">🇮🇳 Kannada (ಕನ್ನಡ)</option>
-            <option value="Malayalam">🇮🇳 Malayalam (മലയാളം)</option>
-            <option value="Punjabi">🇮🇳 Punjabi (ਪੰਜਾਬੀ)</option>
-            <option value="Urdu">🇮🇳 Urdu (اردو)</option>
-            <option value="Spanish">🇪🇸 Spanish (Español)</option>
-            <option value="French">🇫🇷 French (Français)</option>
-            <option value="German">🇩🇪 German (Deutsch)</option>
-          </select>
-        </div>
+        <!-- Multi-Language Selector Trigger Pill -->
+        <button 
+          type="button" 
+          class="header-pill-btn lang-pill-btn" 
+          (click)="openLangModal()" 
+          [title]="'Selected Language: ' + selectedLanguage"
+        >
+          <span class="pill-flag">{{ getSelectedLanguageFlag() }}</span>
+          <span class="pill-text">{{ getSelectedLanguageShortName() }}</span>
+          <i class="ri-arrow-down-s-line pill-chevron"></i>
+        </button>
 
         <!-- Private / Incognito Mode Toggle Button -->
         <button 
@@ -266,6 +258,123 @@ import { VoiceControlService } from '../../services/voice-control.service';
           </button>
         </div>
       </div>
+
+      <!-- Custom AI Model Selector Bottom Sheet Modal -->
+      <div 
+        class="custom-sheet-overlay" 
+        *ngIf="isModelModalOpen" 
+        (click)="closeModelModal($event)"
+      >
+        <div class="sheet-dialog sheet-model-dialog" (click)="$event.stopPropagation()">
+          <div class="sheet-handle-bar">
+            <span class="sheet-handle"></span>
+          </div>
+
+          <div class="sheet-header">
+            <div class="sheet-header-title">
+              <div class="sheet-header-icon-wrap model-glow-icon">
+                <i class="ri-cpu-line"></i>
+              </div>
+              <div class="sheet-header-text">
+                <h3 class="sheet-title">Select AI Model</h3>
+                <p class="sheet-subtitle">Choose the intelligence engine for your conversation</p>
+              </div>
+            </div>
+            <button type="button" class="sheet-close-btn" (click)="isModelModalOpen = false" title="Close">
+              <i class="ri-close-line"></i>
+            </button>
+          </div>
+
+          <div class="sheet-body model-sheet-body">
+            <div 
+              *ngFor="let m of availableModels" 
+              class="sheet-card-item model-card-item"
+              [class.active]="selectedModel === m.id"
+              (click)="selectModel(m.id)"
+            >
+              <div class="sheet-card-icon" [ngClass]="getModelIconClass(m.id)">
+                <i [class]="getModelIcon(m.id)"></i>
+              </div>
+              <div class="sheet-card-info">
+                <div class="sheet-card-name-row">
+                  <span class="sheet-card-name">{{ m.name }}</span>
+                  <span class="card-badge" [ngClass]="getModelBadgeClass(m.id)">
+                    {{ getModelBadge(m.id) }}
+                  </span>
+                </div>
+                <p class="sheet-card-desc">{{ getModelDescription(m.id, m.provider) }}</p>
+              </div>
+              <div class="sheet-card-check">
+                <i class="ri-checkbox-circle-fill active-check-icon" *ngIf="selectedModel === m.id"></i>
+                <span class="empty-check-circle" *ngIf="selectedModel !== m.id"></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="sheet-footer">
+            <span class="sheet-footer-hint">
+              <i class="ri-sparkling-fill"></i> Free tier models powered by OpenRouter with zero token charges.
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Custom Language Selector Bottom Sheet Modal -->
+      <div 
+        class="custom-sheet-overlay" 
+        *ngIf="isLangModalOpen" 
+        (click)="closeLangModal($event)"
+      >
+        <div class="sheet-dialog sheet-lang-dialog" (click)="$event.stopPropagation()">
+          <div class="sheet-handle-bar">
+            <span class="sheet-handle"></span>
+          </div>
+
+          <div class="sheet-header">
+            <div class="sheet-header-title">
+              <div class="sheet-header-icon-wrap lang-glow-icon">
+                <i class="ri-global-line"></i>
+              </div>
+              <div class="sheet-header-text">
+                <h3 class="sheet-title">Chat & Voice Language</h3>
+                <p class="sheet-subtitle">Select language for speech synthesis and recognition</p>
+              </div>
+            </div>
+            <button type="button" class="sheet-close-btn" (click)="isLangModalOpen = false" title="Close">
+              <i class="ri-close-line"></i>
+            </button>
+          </div>
+
+          <div class="sheet-body lang-sheet-body">
+            <div class="lang-grid">
+              <div 
+                *ngFor="let lang of availableLanguages" 
+                class="sheet-card-item lang-card-item"
+                [class.active]="selectedLanguage === lang.code"
+                (click)="selectLanguage(lang.code)"
+              >
+                <div class="lang-flag-box">
+                  <span class="lang-flag-emoji">{{ lang.flag }}</span>
+                </div>
+                <div class="sheet-card-info">
+                  <span class="sheet-card-name">{{ lang.name }}</span>
+                  <span class="sheet-card-desc">{{ lang.nativeName }}</span>
+                </div>
+                <div class="sheet-card-check">
+                  <i class="ri-checkbox-circle-fill active-check-icon" *ngIf="selectedLanguage === lang.code"></i>
+                  <span class="empty-check-circle" *ngIf="selectedLanguage !== lang.code"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="sheet-footer">
+            <span class="sheet-footer-hint">
+              <i class="ri-mic-line"></i> Voice assistant automatically adapts speech recognition & accents.
+            </span>
+          </div>
+        </div>
+      </div>
     </div>
   `,
   styles: [`
@@ -282,10 +391,12 @@ import { VoiceControlService } from '../../services/voice-control.service';
       flex: 1;
       height: 100%;
       width: 100%;
+      max-width: 100%;
       display: flex;
       flex-direction: column;
       background: var(--bg-dark);
       position: relative;
+      overflow: hidden;
     }
 
     .chat-header {
@@ -1040,132 +1151,540 @@ import { VoiceControlService } from '../../services/voice-control.service';
       color: var(--text-primary);
     }
 
-    .model-selector {
-      display: flex;
-      align-items: center;
-      gap: 0.45rem;
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid var(--border-color);
-      border-radius: 20px;
-      padding: 0.3rem 0.75rem;
-      transition: all 0.2s ease;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    .model-selector:hover {
-      background: rgba(255, 255, 255, 0.1);
-      border-color: var(--border-active);
-      box-shadow: 0 2px 12px var(--accent-glow);
-    }
-
-    :host-context([data-theme="light"]) .model-selector,
-    [data-theme="light"] .model-selector {
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-    }
-
-    :host-context([data-theme="light"]) .model-selector:hover,
-    [data-theme="light"] .model-selector:hover {
-      background: #f8fafc;
-      border-color: var(--accent-primary);
-    }
-
-    .model-icon {
-      color: #38bdf8;
-      font-size: 1rem;
-      flex-shrink: 0;
-    }
-
-    :host-context([data-theme="light"]) .model-icon,
-    [data-theme="light"] .model-icon {
-      color: #0284c7;
-    }
-
-    .model-select {
-      background: transparent;
-      border: none;
-      color: var(--text-primary);
-      font-family: var(--font-body);
-      font-size: 0.84rem;
-      font-weight: 600;
-      outline: none;
-      cursor: pointer;
-      max-width: 190px;
-      text-overflow: ellipsis;
-      appearance: auto;
-    }
-
-    .model-select option {
-      background: var(--bg-sidebar);
-      color: var(--text-primary);
-      padding: 6px 10px;
-    }
-
-    :host-context([data-theme="light"]) .model-select option,
-    [data-theme="light"] .model-select option {
-      background: #ffffff;
-      color: #0f172a;
-    }
-
-    .lang-selector {
-      margin-left: 0.4rem;
-      display: flex;
+    /* Header Pill Buttons for Model & Language */
+    .header-pill-btn {
+      display: inline-flex;
       align-items: center;
       gap: 0.4rem;
       background: rgba(255, 255, 255, 0.06);
       border: 1px solid var(--border-color);
       border-radius: 20px;
-      padding: 0.25rem 0.65rem;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      transition: all 0.2s ease;
+      padding: 0.32rem 0.75rem;
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+      user-select: none;
+      -webkit-user-select: none;
+      font-family: inherit;
     }
 
-    .lang-selector:hover {
-      background: rgba(255, 255, 255, 0.1);
+    .header-pill-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
       border-color: var(--border-active);
-      box-shadow: 0 2px 12px var(--accent-glow);
+      box-shadow: 0 3px 12px var(--accent-glow);
+      transform: translateY(-1px);
     }
 
-    :host-context([data-theme="light"]) .lang-selector,
-    [data-theme="light"] .lang-selector {
+    .header-pill-btn:active {
+      transform: translateY(0);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    :host-context([data-theme="light"]) .header-pill-btn,
+    [data-theme="light"] .header-pill-btn {
       background: #ffffff;
       border: 1px solid #e2e8f0;
+      color: #0f172a;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
     }
 
-    :host-context([data-theme="light"]) .lang-selector:hover,
-    [data-theme="light"] .lang-selector:hover {
+    :host-context([data-theme="light"]) .header-pill-btn:hover,
+    [data-theme="light"] .header-pill-btn:hover {
       background: #f8fafc;
       border-color: var(--accent-primary);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
     }
 
-    .lang-icon {
-      color: var(--accent-primary);
+    .model-pill-icon {
+      color: #38bdf8;
       font-size: 1rem;
+      flex-shrink: 0;
     }
 
-    .lang-select {
-      background: transparent;
-      border: none;
-      color: var(--text-primary);
-      font-family: var(--font-body);
+    :host-context([data-theme="light"]) .model-pill-icon,
+    [data-theme="light"] .model-pill-icon {
+      color: #0284c7;
+    }
+
+    .pill-flag {
+      font-size: 0.95rem;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .pill-text {
       font-size: 0.82rem;
-      font-weight: 500;
-      outline: none;
-      cursor: pointer;
-    }
-
-    .lang-select option {
-      background: var(--bg-sidebar);
+      font-weight: 600;
       color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 140px;
     }
 
-    :host-context([data-theme="light"]) .lang-select option,
-    [data-theme="light"] .lang-select option {
-      background: #ffffff;
+    :host-context([data-theme="light"]) .pill-text,
+    [data-theme="light"] .pill-text {
+      color: #1e293b;
+    }
+
+    .pill-chevron {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      flex-shrink: 0;
+      transition: transform 0.2s ease;
+    }
+
+    .header-pill-btn:hover .pill-chevron {
+      color: var(--text-primary);
+      transform: translateY(1px);
+    }
+
+    /* Custom Bottom-Sheet & Modal Overlays */
+    .custom-sheet-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(4, 7, 18, 0.65);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 10000;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      animation: sheetFadeIn 0.22s ease-out;
+    }
+
+    @keyframes sheetFadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .sheet-dialog {
+      background: rgba(18, 22, 36, 0.96);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
+      width: 100%;
+      max-height: 85vh;
+      border-top-left-radius: 24px;
+      border-top-right-radius: 24px;
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+      display: flex;
+      flex-direction: column;
+      animation: sheetSlideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+      overflow: hidden;
+    }
+
+    @keyframes sheetSlideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+
+    @keyframes modalZoomIn {
+      from { transform: scale(0.95); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    :host-context([data-theme="light"]) .sheet-dialog,
+    [data-theme="light"] .sheet-dialog {
+      background: rgba(255, 255, 255, 0.98);
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 -10px 35px rgba(15, 23, 42, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Handle bar on mobile */
+    .sheet-handle-bar {
+      display: flex;
+      justify-content: center;
+      padding: 10px 0 2px 0;
+      cursor: grab;
+    }
+
+    .sheet-handle {
+      width: 40px;
+      height: 4px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    :host-context([data-theme="light"]) .sheet-handle,
+    [data-theme="light"] .sheet-handle {
+      background: #cbd5e1;
+    }
+
+    /* Sheet Header */
+    .sheet-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.9rem 1.25rem 0.8rem 1.25rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    }
+
+    :host-context([data-theme="light"]) .sheet-header,
+    [data-theme="light"] .sheet-header {
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .sheet-header-title {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .sheet-header-icon-wrap {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      flex-shrink: 0;
+    }
+
+    .model-glow-icon {
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+
+    .lang-glow-icon {
+      background: rgba(168, 85, 247, 0.15);
+      color: #c084fc;
+      border: 1px solid rgba(168, 85, 247, 0.3);
+    }
+
+    :host-context([data-theme="light"]) .model-glow-icon,
+    [data-theme="light"] .model-glow-icon {
+      background: #e0f2fe;
+      color: #0284c7;
+      border-color: #bae6fd;
+    }
+
+    :host-context([data-theme="light"]) .lang-glow-icon,
+    [data-theme="light"] .lang-glow-icon {
+      background: #f3e8ff;
+      color: #9333ea;
+      border-color: #e9d5ff;
+    }
+
+    .sheet-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin: 0;
+      line-height: 1.2;
+    }
+
+    :host-context([data-theme="light"]) .sheet-title,
+    [data-theme="light"] .sheet-title {
       color: #0f172a;
+    }
+
+    .sheet-subtitle {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin: 0.15rem 0 0 0;
+    }
+
+    :host-context([data-theme="light"]) .sheet-subtitle,
+    [data-theme="light"] .sheet-subtitle {
+      color: #64748b;
+    }
+
+    .sheet-close-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.2rem;
+      transition: all 0.2s ease;
+    }
+
+    .sheet-close-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: var(--text-primary);
+      transform: rotate(90deg);
+    }
+
+    :host-context([data-theme="light"]) .sheet-close-btn,
+    [data-theme="light"] .sheet-close-btn {
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      color: #475569;
+    }
+
+    :host-context([data-theme="light"]) .sheet-close-btn:hover,
+    [data-theme="light"] .sheet-close-btn:hover {
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+
+    /* Sheet Body */
+    .sheet-body {
+      padding: 0.9rem 1.15rem;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      max-height: calc(85vh - 130px);
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+    }
+
+    /* Sheet Card Items (Models & Languages) */
+    .sheet-card-item {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      padding: 0.75rem 0.95rem;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .sheet-card-item:hover {
+      background: rgba(255, 255, 255, 0.09);
+      border-color: rgba(255, 255, 255, 0.18);
+      transform: translateY(-1px);
+    }
+
+    .sheet-card-item:active {
+      transform: scale(0.99);
+      background: rgba(255, 255, 255, 0.07);
+    }
+
+    .sheet-card-item.active {
+      background: rgba(99, 102, 241, 0.14);
+      border-color: rgba(99, 102, 241, 0.45);
+      box-shadow: 0 0 15px rgba(99, 102, 241, 0.15);
+    }
+
+    :host-context([data-theme="light"]) .sheet-card-item,
+    [data-theme="light"] .sheet-card-item {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+    }
+
+    :host-context([data-theme="light"]) .sheet-card-item:hover,
+    [data-theme="light"] .sheet-card-item:hover {
+      background: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    :host-context([data-theme="light"]) .sheet-card-item.active,
+    [data-theme="light"] .sheet-card-item.active {
+      background: #eef2ff;
+      border-color: #6366f1;
+      box-shadow: 0 2px 8px rgba(99, 102, 241, 0.12);
+    }
+
+    .sheet-card-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      flex-shrink: 0;
+    }
+
+    .icon-amber { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.25); }
+    .icon-purple { background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.25); }
+    .icon-cyan { background: rgba(6, 182, 212, 0.15); color: #22d3ee; border: 1px solid rgba(6, 182, 212, 0.25); }
+    .icon-emerald { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.25); }
+    .icon-rose { background: rgba(244, 63, 94, 0.15); color: #fb7185; border: 1px solid rgba(244, 63, 94, 0.25); }
+    .icon-blue { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.25); }
+
+    :host-context([data-theme="light"]) .icon-amber { background: #fef3c7; color: #d97706; border-color: #fde68a; }
+    :host-context([data-theme="light"]) .icon-purple { background: #f3e8ff; color: #9333ea; border-color: #e9d5ff; }
+    :host-context([data-theme="light"]) .icon-cyan { background: #cffafe; color: #0891b2; border-color: #a5f3fc; }
+    :host-context([data-theme="light"]) .icon-emerald { background: #d1fae5; color: #059669; border-color: #a7f3d0; }
+    :host-context([data-theme="light"]) .icon-rose { background: #ffe4e6; color: #e11d48; border-color: #fecdd3; }
+    :host-context([data-theme="light"]) .icon-blue { background: #dbeafe; color: #2563eb; border-color: #bfdbfe; }
+
+    .sheet-card-info {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.18rem;
+    }
+
+    .sheet-card-name-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .sheet-card-name {
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    :host-context([data-theme="light"]) .sheet-card-name,
+    [data-theme="light"] .sheet-card-name {
+      color: #0f172a;
+    }
+
+    .card-badge {
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+      line-height: 1.2;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+
+    .badge-amber { background: rgba(245, 158, 11, 0.2); color: #fcd34d; }
+    .badge-purple { background: rgba(168, 85, 247, 0.2); color: #d8b4fe; }
+    .badge-cyan { background: rgba(6, 182, 212, 0.2); color: #67e8f9; }
+    .badge-emerald { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; }
+    .badge-rose { background: rgba(244, 63, 94, 0.2); color: #fda4af; }
+    .badge-blue { background: rgba(59, 130, 246, 0.2); color: #93c5fd; }
+    .badge-neutral { background: rgba(255, 255, 255, 0.1); color: #cbd5e1; }
+
+    :host-context([data-theme="light"]) .badge-amber { background: #fef3c7; color: #b45309; }
+    :host-context([data-theme="light"]) .badge-purple { background: #f3e8ff; color: #7e22ce; }
+    :host-context([data-theme="light"]) .badge-cyan { background: #cffafe; color: #0e7490; }
+    :host-context([data-theme="light"]) .badge-emerald { background: #d1fae5; color: #047857; }
+    :host-context([data-theme="light"]) .badge-rose { background: #ffe4e6; color: #be123c; }
+    :host-context([data-theme="light"]) .badge-blue { background: #dbeafe; color: #1d4ed8; }
+    :host-context([data-theme="light"]) .badge-neutral { background: #f1f5f9; color: #475569; }
+
+    .sheet-card-desc {
+      font-size: 0.77rem;
+      color: var(--text-muted);
+      margin: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    :host-context([data-theme="light"]) .sheet-card-desc,
+    [data-theme="light"] .sheet-card-desc {
+      color: #64748b;
+    }
+
+    .sheet-card-check {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+
+    .active-check-icon {
+      font-size: 1.3rem;
+      color: #6366f1;
+      filter: drop-shadow(0 0 6px rgba(99, 102, 241, 0.6));
+    }
+
+    .empty-check-circle {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(255, 255, 255, 0.2);
+    }
+
+    :host-context([data-theme="light"]) .empty-check-circle,
+    [data-theme="light"] .empty-check-circle {
+      border-color: #cbd5e1;
+    }
+
+    /* Language Grid */
+    .lang-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.5rem;
+    }
+
+    .lang-flag-box {
+      width: 38px;
+      height: 38px;
+      border-radius: 11px;
+      background: rgba(255, 255, 255, 0.06);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.35rem;
+      flex-shrink: 0;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    :host-context([data-theme="light"]) .lang-flag-box,
+    [data-theme="light"] .lang-flag-box {
+      background: #f1f5f9;
+      border-color: #e2e8f0;
+    }
+
+    /* Sheet Footer */
+    .sheet-footer {
+      padding: 0.75rem 1.25rem 1rem 1.25rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.07);
+      background: rgba(0, 0, 0, 0.15);
+    }
+
+    :host-context([data-theme="light"]) .sheet-footer,
+    [data-theme="light"] .sheet-footer {
+      border-top: 1px solid #f1f5f9;
+      background: #f8fafc;
+    }
+
+    .sheet-footer-hint {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .sheet-footer-hint i {
+      color: var(--accent-primary);
+      font-size: 0.85rem;
+    }
+
+    /* Desktop View for Sheet Dialog */
+    @media (min-width: 769px) {
+      .custom-sheet-overlay {
+        align-items: center;
+        padding: 1.5rem;
+      }
+
+      .sheet-dialog {
+        max-width: 540px;
+        border-radius: 20px;
+        animation: modalZoomIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
+      }
+
+      .sheet-handle-bar {
+        display: none;
+      }
+
+      .lang-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
     }
 
     .short-label {
@@ -1540,24 +2059,30 @@ import { VoiceControlService } from '../../services/voice-control.service';
         min-width: 32px;
         height: 32px;
       }
-      .model-selector {
-        padding: 0.2rem 0.4rem;
-        gap: 0.2rem;
+      .header-pill-btn {
+        padding: 0.2rem 0.42rem;
+        gap: 0.22rem;
         flex-shrink: 0;
       }
-      .model-select {
-        font-size: 0.76rem;
-        max-width: 90px;
+      .model-pill-btn {
+        max-width: 105px;
       }
-      .lang-selector {
+      .lang-pill-btn {
         margin-left: 0.1rem;
-        padding: 0.2rem 0.4rem;
-        gap: 0.2rem;
-        flex-shrink: 0;
+        max-width: 78px;
       }
-      .lang-select {
-        font-size: 0.76rem;
-        max-width: 70px;
+      .pill-text {
+        font-size: 0.75rem;
+        max-width: 58px;
+      }
+      .model-pill-icon {
+        font-size: 0.85rem;
+      }
+      .pill-flag {
+        font-size: 0.82rem;
+      }
+      .pill-chevron {
+        font-size: 0.75rem;
       }
       .rag-toggle-btn {
         margin-left: 0.1rem;
@@ -1623,6 +2148,27 @@ export class ChatBoxComponent implements OnInit, AfterViewChecked, OnChanges {
   userInputText: string = '';
   selectedLanguage: string = 'English';
   selectedModel: string = 'openrouter/free';
+  isModelModalOpen: boolean = false;
+  isLangModalOpen: boolean = false;
+
+  availableLanguages = [
+    { code: 'English', name: 'English', flag: '🇬🇧', nativeName: 'English (Global)' },
+    { code: 'English (India)', name: 'English (India)', flag: '🇮🇳', nativeName: 'Indian English' },
+    { code: 'Hindi', name: 'Hindi', flag: '🇮🇳', nativeName: 'हिंदी' },
+    { code: 'Bengali', name: 'Bengali', flag: '🇮🇳', nativeName: 'বাংলা' },
+    { code: 'Tamil', name: 'Tamil', flag: '🇮🇳', nativeName: 'தமிழ்' },
+    { code: 'Telugu', name: 'Telugu', flag: '🇮🇳', nativeName: 'తెలుగు' },
+    { code: 'Marathi', name: 'Marathi', flag: '🇮🇳', nativeName: 'मराठी' },
+    { code: 'Gujarati', name: 'Gujarati', flag: '🇮🇳', nativeName: 'ગુજરાતી' },
+    { code: 'Kannada', name: 'Kannada', flag: '🇮🇳', nativeName: 'ಕನ್ನಡ' },
+    { code: 'Malayalam', name: 'Malayalam', flag: '🇮🇳', nativeName: 'മലയാളം' },
+    { code: 'Punjabi', name: 'Punjabi', flag: '🇮🇳', nativeName: 'ਪੰਜਾਬੀ' },
+    { code: 'Urdu', name: 'Urdu', flag: '🇮🇳', nativeName: 'اردو' },
+    { code: 'Spanish', name: 'Spanish', flag: '🇪🇸', nativeName: 'Español' },
+    { code: 'French', name: 'French', flag: '🇫🇷', nativeName: 'Français' },
+    { code: 'German', name: 'German', flag: '🇩🇪', nativeName: 'Deutsch' },
+  ];
+
   availableModels: ModelOption[] = [
     { id: 'openrouter/free', name: 'OpenRouter Free (Auto Router)', provider: 'OpenRouter' },
     { id: 'z-ai/glm-5.2:free', name: 'Z.ai GLM 5.2 (Free)', provider: 'OpenRouter' },
@@ -1725,6 +2271,121 @@ export class ChatBoxComponent implements OnInit, AfterViewChecked, OnChanges {
     }).catch(err => {
       console.error('Failed to copy text:', err);
     });
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscapePress() {
+    if (this.isModelModalOpen) this.isModelModalOpen = false;
+    if (this.isLangModalOpen) this.isLangModalOpen = false;
+  }
+
+  openModelModal(): void {
+    this.isModelModalOpen = true;
+  }
+
+  closeModelModal(event?: MouseEvent): void {
+    this.isModelModalOpen = false;
+  }
+
+  openLangModal(): void {
+    this.isLangModalOpen = true;
+  }
+
+  closeLangModal(event?: MouseEvent): void {
+    this.isLangModalOpen = false;
+  }
+
+  selectModel(id: string): void {
+    this.selectedModel = id;
+    this.onModelChange();
+    this.isModelModalOpen = false;
+  }
+
+  selectLanguage(langCode: string): void {
+    this.selectedLanguage = langCode;
+    this.onLanguageChange(langCode);
+    this.isLangModalOpen = false;
+  }
+
+  getSelectedModelShortName(): string {
+    const id = this.selectedModel || '';
+    if (id.includes('gemini-2.0-flash')) return 'Gemini 2.0';
+    if (id.includes('llama-3.3-70b')) return 'Llama 3.3 70B';
+    if (id.includes('llama-3.1-8b')) return 'Llama 3.1 8B';
+    if (id.includes('llama-3.2-3b')) return 'Llama 3.2 3B';
+    if (id.includes('mistral-7b')) return 'Mistral 7B';
+    if (id.includes('glm-5.2')) return 'GLM 5.2';
+    if (id.includes('openrouter/free')) return 'Auto Router';
+    const found = this.availableModels.find(m => m.id === id);
+    if (found) {
+      return found.name.replace(/\(Free\)/gi, '').trim();
+    }
+    return 'Select Model';
+  }
+
+  getSelectedLanguageShortName(): string {
+    if (this.selectedLanguage === 'English (India)') return 'Eng (IN)';
+    return this.selectedLanguage || 'English';
+  }
+
+  getSelectedLanguageFlag(): string {
+    const found = this.availableLanguages.find(l => l.code === this.selectedLanguage);
+    return found ? found.flag : '🌐';
+  }
+
+  getModelIcon(id: string): string {
+    if (!id) return 'ri-robot-2-line';
+    if (id.includes('gemini')) return 'ri-sparkling-fill';
+    if (id.includes('llama-3.3')) return 'ri-shield-star-line';
+    if (id.includes('llama')) return 'ri-cpu-line';
+    if (id.includes('glm')) return 'ri-brain-line';
+    if (id.includes('mistral')) return 'ri-compass-3-line';
+    if (id.includes('openrouter')) return 'ri-flashlight-line';
+    return 'ri-robot-2-line';
+  }
+
+  getModelIconClass(id: string): string {
+    if (!id) return 'icon-blue';
+    if (id.includes('gemini')) return 'icon-amber';
+    if (id.includes('llama-3.3')) return 'icon-purple';
+    if (id.includes('glm')) return 'icon-emerald';
+    if (id.includes('mistral')) return 'icon-rose';
+    if (id.includes('openrouter')) return 'icon-cyan';
+    return 'icon-blue';
+  }
+
+  getModelBadge(id: string): string {
+    if (!id) return 'AI Model';
+    if (id.includes('llama-3.3-70b')) return '🧠 70B Heavy';
+    if (id.includes('gemini-2.0-flash')) return '⚡ Ultra Fast';
+    if (id.includes('openrouter/free')) return '🚀 Auto Balanced';
+    if (id.includes('glm-5.2')) return '🌐 High Context';
+    if (id.includes('llama-3.1-8b')) return '⚡ Fast Code';
+    if (id.includes('mistral-7b')) return '🎯 Concise';
+    if (id.includes('llama-3.2-3b')) return '🪶 Lightweight';
+    return 'Free Tier';
+  }
+
+  getModelBadgeClass(id: string): string {
+    if (!id) return 'badge-neutral';
+    if (id.includes('llama-3.3-70b')) return 'badge-purple';
+    if (id.includes('gemini-2.0-flash')) return 'badge-amber';
+    if (id.includes('openrouter/free')) return 'badge-cyan';
+    if (id.includes('glm-5.2')) return 'badge-emerald';
+    if (id.includes('mistral-7b')) return 'badge-rose';
+    return 'badge-blue';
+  }
+
+  getModelDescription(id: string, provider?: string): string {
+    if (!id) return 'Universal AI model';
+    if (id.includes('llama-3.3-70b')) return 'Deep reasoning, coding, and complex problem solving';
+    if (id.includes('gemini-2.0-flash')) return 'Google flagship lightning-fast response generator';
+    if (id.includes('openrouter/free')) return 'Smart auto-selection of the best available free model';
+    if (id.includes('glm-5.2')) return 'General conversation and bilingual understanding';
+    if (id.includes('llama-3.1-8b')) return 'Quick versatile model for day-to-day chat tasks';
+    if (id.includes('mistral-7b')) return 'European open-source model optimized for precision';
+    if (id.includes('llama-3.2-3b')) return 'Ultra-compact model for fast lightweight replies';
+    return provider ? `Provided by ${provider}` : 'High performance free tier LLM';
   }
 
   getSelectedModelName(): string {

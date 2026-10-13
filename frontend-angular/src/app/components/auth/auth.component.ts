@@ -44,9 +44,15 @@ import { ThemeService } from '../../services/theme.service';
             <i [class]="themeService.isDark ? 'ri-sun-line' : 'ri-moon-line'"></i>
           </button>
 
+          <button *ngIf="!authService.isLoggedIn" class="header-auth-btn" (click)="scrollToAuth()">
+            <span>Sign In</span>
+            <i class="ri-arrow-down-line"></i>
+          </button>
+
           <button *ngIf="authService.isLoggedIn" class="go-chat-header-btn" (click)="navigateToChat.emit()">
             <i class="ri-chat-3-line"></i>
-            <span>Open Chat Workspace</span>
+            <span class="desktop-only-text">Open Chat Workspace</span>
+            <span class="mobile-only-text">Chat</span>
             <i class="ri-arrow-right-line"></i>
           </button>
 
@@ -67,7 +73,7 @@ import { ThemeService } from '../../services/theme.service';
           </div>
 
           <h1 class="hero-title">
-            Empower Your Mind with <br>
+            Empower Your Mind with <br class="desktop-only-break">
             <span class="gradient-text glow-text">Lumi AI</span>
           </h1>
 
@@ -75,6 +81,32 @@ import { ThemeService } from '../../services/theme.service';
             Your high-performance AI second brain. Combine deep conversation memory, 
             vectorized knowledge retrieval, live web research, and multilingual voice speech in one unified interface.
           </p>
+
+          <!-- Quick Action CTA Row for Mobile & Instant Launch -->
+          <div class="hero-cta-row">
+            <ng-container *ngIf="!authService.isLoggedIn">
+              <button class="hero-primary-cta-btn" (click)="scrollToAuth()">
+                <i class="ri-flashlight-fill"></i>
+                <span>Get Started Free</span>
+                <i class="ri-arrow-right-line"></i>
+              </button>
+              <button class="hero-secondary-cta-btn" (click)="scrollToFeatures()">
+                <i class="ri-sparkling-line"></i>
+                <span>Explore Features</span>
+              </button>
+            </ng-container>
+            <ng-container *ngIf="authService.isLoggedIn">
+              <button class="hero-primary-cta-btn" (click)="navigateToChat.emit()">
+                <i class="ri-chat-3-fill"></i>
+                <span>Open Workspace</span>
+                <i class="ri-arrow-right-line"></i>
+              </button>
+              <button class="hero-secondary-cta-btn" (click)="scrollToFeatures()">
+                <i class="ri-sparkling-line"></i>
+                <span>Explore Features</span>
+              </button>
+            </ng-container>
+          </div>
 
           <!-- Interactive Highlights Stats Ticker -->
           <div class="stats-bar">
@@ -100,7 +132,7 @@ import { ThemeService } from '../../services/theme.service';
           </div>
 
           <!-- Feature Capability Grid (Static Showcase) -->
-          <div class="feature-grid">
+          <div class="feature-grid" id="features-section">
             <div class="feature-item">
               <div class="feat-icon-box purple">
                 <i class="ri-book-open-line"></i>
@@ -172,7 +204,7 @@ import { ThemeService } from '../../services/theme.service';
         </div>
 
         <!-- Right Glassmorphism Auth / Welcome Hub -->
-        <div class="auth-card-wrapper">
+        <div class="auth-card-wrapper" id="auth-card-section">
 
           <!-- Welcome Card when Logged In -->
           <div *ngIf="authService.isLoggedIn" class="welcome-card glass-panel">
@@ -460,16 +492,30 @@ import { ThemeService } from '../../services/theme.service';
     </div>
   `,
   styles: [`
+    :host {
+      display: block;
+      width: 100%;
+      max-width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
     .auth-page-container {
-      min-height: 100vh;
-      width: 100vw;
+      height: 100%;
+      max-height: 100%;
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
       background-color: var(--bg-dark);
       color: var(--text-primary);
       display: flex;
       flex-direction: column;
       position: relative;
-      overflow-x: hidden;
       overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-y;
+      overscroll-behavior-y: contain;
       background-image: 
         radial-gradient(circle at 15% 15%, rgba(99, 102, 241, 0.08) 0%, transparent 40%),
         radial-gradient(circle at 85% 85%, rgba(236, 72, 153, 0.08) 0%, transparent 40%);
@@ -528,6 +574,7 @@ import { ThemeService } from '../../services/theme.service';
     }
 
     .auth-header {
+      flex-shrink: 0;
       height: 72px;
       display: flex;
       align-items: center;
@@ -540,6 +587,8 @@ import { ThemeService } from '../../services/theme.service';
       position: sticky;
       top: 0;
       z-index: 50;
+      width: 100%;
+      box-sizing: border-box;
     }
 
     .brand {
@@ -624,6 +673,37 @@ import { ThemeService } from '../../services/theme.service';
       gap: 0.85rem;
     }
 
+    .header-auth-btn {
+      background: var(--bg-pill);
+      border: 1px solid var(--border-active);
+      border-radius: 20px;
+      padding: 0.45rem 1rem;
+      color: var(--text-primary);
+      font-size: 0.84rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 10px rgba(99, 102, 241, 0.15);
+    }
+
+    .header-auth-btn:hover {
+      background: rgba(99, 102, 241, 0.2);
+      border-color: var(--accent-primary);
+      color: #fff;
+      transform: translateY(-1px);
+    }
+
+    .desktop-only-text {
+      display: inline;
+    }
+
+    .mobile-only-text {
+      display: none;
+    }
+
     .go-chat-header-btn {
       background: var(--accent-gradient);
       border: none;
@@ -688,7 +768,7 @@ import { ThemeService } from '../../services/theme.service';
     }
 
     .auth-main {
-      flex: 1;
+      flex: 1 0 auto;
       max-width: 1320px;
       width: 100%;
       margin: 0 auto;
@@ -699,12 +779,18 @@ import { ThemeService } from '../../services/theme.service';
       align-items: center;
       position: relative;
       z-index: 10;
+      min-width: 0;
+      box-sizing: border-box;
     }
 
     .hero-section {
       display: flex;
       flex-direction: column;
       gap: 1.6rem;
+      min-width: 0;
+      width: 100%;
+      box-sizing: border-box;
+      flex-shrink: 0;
     }
 
     .hero-badge-row {
@@ -712,6 +798,7 @@ import { ThemeService } from '../../services/theme.service';
       align-items: center;
       gap: 0.75rem;
       flex-wrap: wrap;
+      min-width: 0;
     }
 
     .pill-badge {
@@ -741,11 +828,15 @@ import { ThemeService } from '../../services/theme.service';
 
     .hero-title {
       font-family: var(--font-heading);
-      font-size: 3.2rem;
+      font-size: clamp(2rem, 4.5vw + 0.5rem, 3.2rem);
       font-weight: 800;
       line-height: 1.15;
       letter-spacing: -0.03em;
       color: var(--text-primary);
+      text-wrap: balance;
+      word-break: normal;
+      overflow-wrap: break-word;
+      max-width: 100%;
     }
 
     .gradient-text {
@@ -763,6 +854,58 @@ import { ThemeService } from '../../services/theme.service';
       color: var(--text-secondary);
       line-height: 1.65;
       max-width: 580px;
+    }
+
+    .hero-cta-row {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      flex-wrap: wrap;
+      margin-top: 0.2rem;
+    }
+
+    .hero-primary-cta-btn {
+      background: var(--accent-gradient);
+      border: none;
+      border-radius: 14px;
+      padding: 0.8rem 1.4rem;
+      color: white;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      box-shadow: 0 4px 18px var(--accent-glow);
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .hero-primary-cta-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px var(--accent-glow);
+    }
+
+    .hero-secondary-cta-btn {
+      background: var(--bg-pill);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 0.8rem 1.25rem;
+      color: var(--text-primary);
+      font-weight: 600;
+      font-size: 0.92rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+      backdrop-filter: blur(8px);
+    }
+
+    .hero-secondary-cta-btn:hover {
+      background: rgba(99, 102, 241, 0.15);
+      border-color: var(--border-active);
+      color: var(--accent-primary);
+      transform: translateY(-2px);
     }
 
     .stats-bar {
@@ -810,6 +953,7 @@ import { ThemeService } from '../../services/theme.service';
       grid-template-columns: 1fr 1fr;
       gap: 1.1rem;
       margin-top: 0.5rem;
+      min-width: 0;
     }
 
     .feature-item {
@@ -826,6 +970,8 @@ import { ThemeService } from '../../services/theme.service';
       overflow: hidden;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
       transition: border-color 0.25s ease, background 0.25s ease;
+      min-width: 0;
+      box-sizing: border-box;
     }
 
     .feature-item::before {
@@ -878,6 +1024,7 @@ import { ThemeService } from '../../services/theme.service';
 
     .feat-content {
       flex: 1;
+      min-width: 0;
     }
 
     .feat-header-row {
@@ -1615,6 +1762,30 @@ import { ThemeService } from '../../services/theme.service';
       color: #0f172a;
     }
 
+    :host-context([data-theme="light"]) .hero-secondary-cta-btn {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      color: #334155;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+    }
+
+    :host-context([data-theme="light"]) .hero-secondary-cta-btn:hover {
+      background: #f1f5f9;
+      border-color: #94a3b8;
+      color: #0f172a;
+    }
+
+    :host-context([data-theme="light"]) .header-auth-btn {
+      background: #ffffff;
+      border-color: #cbd5e1;
+      color: #1e293b;
+    }
+
+    :host-context([data-theme="light"]) .stat-item {
+      background: rgba(241, 245, 249, 0.85);
+      border-color: #e2e8f0;
+    }
+
     @media (max-width: 1024px) {
       .auth-header {
         padding: 0 1.5rem;
@@ -1626,13 +1797,25 @@ import { ThemeService } from '../../services/theme.service';
         grid-template-columns: 1fr;
         padding: 2rem 1.25rem;
         gap: 2.5rem;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
       }
       .hero-section {
         text-align: center;
         align-items: center;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+      }
+      .hero-badge-row {
+        justify-content: center;
       }
       .hero-title {
-        font-size: 2.4rem;
+        font-size: clamp(2rem, 5vw, 2.6rem);
+      }
+      .hero-cta-row {
+        justify-content: center;
       }
       .stats-bar {
         justify-content: center;
@@ -1647,34 +1830,219 @@ import { ThemeService } from '../../services/theme.service';
       }
       .welcome-card, .auth-card {
         max-width: 500px;
+        width: 100%;
+        box-sizing: border-box;
       }
     }
 
     @media (max-width: 640px) {
       .auth-header {
         padding: 0 1rem;
-        height: 64px;
+        height: 60px;
       }
       .brand-sub {
         display: none;
       }
+      .desktop-only-break {
+        display: none;
+      }
+      .desktop-only-text {
+        display: none;
+      }
+      .mobile-only-text {
+        display: inline;
+      }
+      .go-chat-header-btn {
+        padding: 0.45rem 0.85rem;
+        font-size: 0.82rem;
+      }
+      .header-auth-btn {
+        padding: 0.4rem 0.75rem;
+        font-size: 0.78rem;
+      }
+      .auth-main {
+        flex: 1 0 auto;
+        padding: 1.25rem 0.85rem 4.5rem 0.85rem;
+        gap: 2rem;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        overflow-x: hidden;
+      }
+      .hero-section {
+        gap: 1.25rem;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+      }
+      .hero-badge-row {
+        gap: 0.5rem;
+        width: 100%;
+        justify-content: center;
+      }
+      .pill-badge {
+        padding: 0.35rem 0.75rem;
+        font-size: 0.75rem;
+        gap: 0.4rem;
+      }
       .hero-title {
-        font-size: 2rem;
+        font-size: clamp(1.75rem, 7.5vw, 2.15rem);
+        line-height: 1.2;
+        letter-spacing: -0.025em;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+      }
+      .hero-desc {
+        font-size: 0.92rem;
+        line-height: 1.55;
+        max-width: 100%;
+        text-wrap: pretty;
+        padding: 0 0.25rem;
+      }
+      .hero-cta-row {
+        width: 100%;
+        flex-direction: column;
+        gap: 0.65rem;
+      }
+      .hero-primary-cta-btn, .hero-secondary-cta-btn {
+        width: 100%;
+        justify-content: center;
+        padding: 0.85rem 1rem;
+        min-height: 48px;
+        font-size: 0.95rem;
+        box-sizing: border-box;
       }
       .stats-bar {
-        flex-wrap: wrap;
-        gap: 0.75rem;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        width: 100%;
+        max-width: 100%;
+        gap: 0.65rem;
         padding: 0.75rem;
+        margin: 0 auto;
+        box-sizing: border-box;
       }
       .stat-divider {
         display: none;
       }
       .stat-item {
         align-items: center;
-        width: 45%;
+        text-align: center;
+        width: 100%;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 0.65rem 0.4rem;
+        box-sizing: border-box;
+      }
+      .stat-num {
+        font-size: 1.25rem;
+      }
+      .stat-label {
+        font-size: 0.68rem;
+      }
+      .feature-grid {
+        width: 100%;
+        max-width: 100%;
+        gap: 0.75rem;
+        box-sizing: border-box;
+      }
+      .feature-item {
+        padding: 0.95rem;
+        gap: 0.75rem;
+        border-radius: 14px;
+        width: 100%;
+        box-sizing: border-box;
+      }
+      .feat-icon-box {
+        width: 38px;
+        height: 38px;
+        font-size: 1.15rem;
+      }
+      .feat-content h4 {
+        font-size: 0.9rem;
+      }
+      .feat-content p {
+        font-size: 0.8rem;
+        line-height: 1.4;
+      }
+      .quick-prompts-section {
+        width: 100%;
+        box-sizing: border-box;
+      }
+      .prompt-chips {
+        flex-direction: column;
+        width: 100%;
+        gap: 0.5rem;
+      }
+      .prompt-chip {
+        width: 100%;
+        box-sizing: border-box;
+        justify-content: flex-start;
+        padding: 0.65rem 0.95rem;
+        font-size: 0.82rem;
+        border-radius: 12px;
+      }
+      .auth-card-wrapper {
+        width: 100%;
+        max-width: 100%;
+        padding: 0;
       }
       .auth-card, .welcome-card {
-        padding: 1.6rem 1.2rem;
+        padding: 1.5rem 1.15rem;
+        border-radius: 20px;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+      }
+      .card-header .auth-title-group h3 {
+        font-size: 1.25rem;
+      }
+      .tab-switcher {
+        height: 44px;
+        padding: 3px;
+      }
+      .tab-switcher button {
+        padding: 0.55rem;
+        font-size: 0.85rem;
+      }
+      .input-icon-box {
+        padding: 0.75rem 0.85rem;
+      }
+      .input-icon-box input {
+        font-size: 16px; /* Prevents auto-zoom in mobile browsers */
+      }
+      .submit-btn {
+        min-height: 48px;
+        font-size: 0.95rem;
+      }
+      .welcome-name {
+        font-size: 1.3rem;
+      }
+      .user-avatar-lg {
+        width: 68px;
+        height: 68px;
+        font-size: 1.8rem;
+      }
+      .shortcut-box {
+        padding: 0.75rem 0.85rem;
+      }
+      .launch-chat-btn {
+        min-height: 48px;
+        padding: 0.85rem;
+      }
+    }
+
+    @media (max-width: 380px) {
+      .hero-title {
+        font-size: 1.65rem;
+      }
+      .auth-main {
+        padding: 1rem 0.5rem 2.5rem 0.5rem;
+      }
+      .auth-card, .welcome-card {
+        padding: 1.25rem 0.85rem;
       }
     }
   `]
@@ -1829,5 +2197,39 @@ export class AuthComponent {
 
     this.isLoading = false;
     this.errorMessage = 'Google OAuth Client ID is not configured. Please sign up or log in with your email and password.';
+  }
+
+  scrollToAuth() {
+    const el = document.getElementById('auth-card-section');
+    const container = document.querySelector('.auth-page-container');
+    if (el && container) {
+      const headerOffset = 65;
+      const elementRect = el.getBoundingClientRect();
+      const containerRect = container.getBoundingClientRect();
+      const targetScrollTop = container.scrollTop + (elementRect.top - containerRect.top) - headerOffset;
+      container.scrollTo({
+        top: Math.max(0, targetScrollTop),
+        behavior: 'smooth'
+      });
+    } else if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
+  scrollToFeatures() {
+    const el = document.getElementById('features-section');
+    const container = document.querySelector('.auth-page-container');
+    if (el && container) {
+      const headerOffset = 65;
+      const elementRect = el.getBoundingClientRect();
+      const containerRect = container.getBoundingClientRect();
+      const targetScrollTop = container.scrollTop + (elementRect.top - containerRect.top) - headerOffset;
+      container.scrollTo({
+        top: Math.max(0, targetScrollTop),
+        behavior: 'smooth'
+      });
+    } else if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   }
 }
